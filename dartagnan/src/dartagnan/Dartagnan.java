@@ -24,6 +24,7 @@ import dartagnan.parsers.ParserResolver;
 
 import org.apache.commons.cli.*;
 
+// This is the version submitted to FMCAD 2018 on August 2018
 @SuppressWarnings("deprecation")
 public class Dartagnan {
 
