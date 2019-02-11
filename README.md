@@ -5,13 +5,13 @@ This tool suite is currently composed of two tools.
 * **DARTAGNAN:** a tool to check state reachability under weak memory models.
 
 <p align="center"> 
-<img src="https://github.com/hernanponcedeleon/Dat3M/blob/master/dartagnan/extras/dartagnan_small.jpg">
+<img src="extras/dartagnan_small.jpg">
 </p>
 
 * **PORTHOS:** a tool to check state inclusion under weak memory models.
 
 <p align="center"> 
-<img src="https://github.com/hernanponcedeleon/Dat3M/blob/master/dartagnan/extras/porthos_small.jpg">
+<img src="extras/porthos_small.jpg">
 </p>
 
 Requeriments
@@ -40,6 +40,8 @@ We provide a set of unit tests that can be run by
 mvn test
 ```
 
+Note that JUnit generates thousands of parametrised tests, which can cause out of memory error in some systems. The issue will be addressed in the next release.
+
 Usage
 ======
 For checking reachability:
@@ -65,8 +67,8 @@ They must be one of the following:
 **Note:** Option target is mandatory in dartagnan when using the.pts format.
 
 Other optional arguments include:
-- -m, --mode {relaxed, idl, kleene}: specifies the encoding for fixed points. Relaxed (default mode) uses the Knaster-Tarski encoding introduced in [1]. Kleene mode uses the Kleene iteration encoding using one Boolean variable for each iteration step. Mode idl uses the Kleene iteration encoding introduced in [2]. 
-- -a, --alias {none, cfi, cfs}: specifies the alias-analysis used. Option cfi (the default one) uses a control-flow-insensitive method. Option cfs uses a control-flow-sensitive method. Option none performs no alias analysis.
+- -m, --mode {knastertarski, idl, kleene}: specifies the encoding for fixed points. Knaster-Tarski (default mode) uses the encoding introduced in [1]. Kleene mode uses the Kleene iteration encoding using one Boolean variable for each iteration step. Mode idl uses the Kleene iteration encoding introduced in [2]. 
+- -a, --alias {none, anderson, cfs}: specifies the alias-analysis used. Option anderson (the default one) uses a control-flow-insensitive Anderson method. Option cfs uses a control-flow-sensitive method. Option none performs no alias analysis.
 - -unroll: unrolling bound for the BMC.
 
 The .pts format
