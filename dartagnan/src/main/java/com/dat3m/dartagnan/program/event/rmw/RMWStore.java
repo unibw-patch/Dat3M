@@ -4,10 +4,11 @@ import com.dat3m.dartagnan.expression.ExprInterface;
 import com.dat3m.dartagnan.expression.IExpr;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.Store;
+import com.dat3m.dartagnan.program.event.utils.EventWithPartner;
 import com.dat3m.dartagnan.program.event.utils.RegReaderData;
 import com.dat3m.dartagnan.program.utils.EType;
 
-public class RMWStore extends Store implements RegReaderData {
+public class RMWStore extends Store implements RegReaderData, EventWithPartner {
 
     protected final RMWLoad loadEvent;
 
@@ -17,7 +18,8 @@ public class RMWStore extends Store implements RegReaderData {
         addFilters(EType.RMW);
     }
 
-    public RMWLoad getLoadEvent(){
+    @Override
+    public RMWLoad getPartner(){
         return loadEvent;
     }
 

@@ -18,16 +18,17 @@ public abstract class BasicRegRelation extends BasicRelation {
             Event e2 = tuple1.getSecond();
             Register register = ((RegWriter)e1).getResultRegister();
 
-            BoolExpr clause = ctx.mkAnd(e1.executes(ctx), e2.executes(ctx));
+            BoolExpr clause = ctx.mkAnd(e1.executes(ctx));
             for(Tuple tuple2 : maxTupleSet.getBySecond(e2)){
                 if(register == ((RegWriter)tuple2.getFirst()).getResultRegister() && e1.getCId() < tuple2.getFirst().getCId()){
                     clause = ctx.mkAnd(clause, ctx.mkNot(tuple2.getFirst().executes(ctx)));
                 }
             }
-            enc = ctx.mkAnd(enc, ctx.mkEq(edge(this.getName(), e1, e2, ctx), clause));
-            enc = ctx.mkAnd(enc, ctx.mkImplies(edge(this.getName(), e1, e2, ctx),
-                    ctx.mkEq(((RegWriter)e1).getResultRegisterExpr(), register.toZ3Int(e2, ctx))
-            ));
+
+            BoolExpr lastRegVal = ctx.mkBoolConst("LastRegVal(E" + e1.getCId() + ",E" + e2.getCId() + "," + register.getName() + ")");
+            enc = ctx.mkAnd(enc, ctx.mkEq(lastRegVal, clause));
+            enc = ctx.mkAnd(enc, ctx.mkImplies(lastRegVal, ctx.mkEq(((RegWriter)e1).getResultRegisterExpr(), register.toZ3Int(e2, ctx))));
+            enc = ctx.mkAnd(enc, ctx.mkEq(edge(this.getName(), e1, e2, ctx), ctx.mkAnd(lastRegVal, e2.executes(ctx))));
         }
         return enc;
     }

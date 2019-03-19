@@ -157,8 +157,8 @@ nre locals [IOpBin op, String mo, String name]
     |   Ast? varName Equals re                                                                                          # nreAssignment
     |   typeSpecifier varName (Equals re)?                                                                              # nreRegDeclaration
 
-//    |   SpinLock LPar address = re RPar                                                                               # nreSpinLock
-//    |   SpinUnlock LPar address = re RPar                                                                             # nreSpinUnlock
+    |   SpinLock LPar address = re RPar                                                                                # nreSpinLock
+    |   SpinUnlock LPar address = re RPar                                                                              # nreSpinUnlock
 //    |   SpinUnlockWait LPar address = re RPar                                                                         # nreSpinUnlockWait
 
     |   ( FenceSmpMb LPar RPar {$name = "Mb";}

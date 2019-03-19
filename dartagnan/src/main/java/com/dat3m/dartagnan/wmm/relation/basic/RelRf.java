@@ -1,6 +1,7 @@
 package com.dat3m.dartagnan.wmm.relation.basic;
 
-import com.dat3m.dartagnan.program.utils.EType;
+import com.dat3m.dartagnan.program.arch.linux.utils.EType;
+import com.dat3m.dartagnan.program.event.Init;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import com.dat3m.dartagnan.wmm.filter.FilterMinus;
 import com.microsoft.z3.BoolExpr;
@@ -48,6 +49,8 @@ public class RelRf extends Relation {
                     }
                 }
             }
+
+            maxTupleSet.removeAll(getIllegalLockTuples(maxTupleSet));
         }
         return maxTupleSet;
     }
@@ -77,14 +80,13 @@ public class RelRf extends Relation {
             enc = ctx.mkAnd(enc, ctx.mkImplies(r.executes(ctx), encodeEO(r.getCId(), rfMap.get(r))));
         }
 
-        return enc;
+        return ctx.mkAnd(enc, encodeLockConstraints());
     }
 
     private BoolExpr encodeEO(int readId, List<BoolExpr> set){
         int num = set.size();
 
         BoolExpr enc = ctx.mkEq(mkL(readId, 0), ctx.mkFalse());
-        enc = ctx.mkAnd(enc, ctx.mkNot(ctx.mkAnd(set.get(0), mkL(readId, 0))));
         BoolExpr atLeastOne = set.get(0);
 
         for(int i = 1; i < num; i++){
@@ -97,5 +99,85 @@ public class RelRf extends Relation {
 
     private BoolExpr mkL(int readId, int i) {
         return (BoolExpr) ctx.mkConst("l(" + readId + "," + i + ")", ctx.mkBoolSort());
+    }
+
+    private TupleSet getIllegalLockTuples(TupleSet tupleSet){
+        TupleSet result = new TupleSet();
+        for(Tuple tuple : tupleSet){
+            if(tuple.getFirst().is(EType.LKW)){
+                result.add(tuple);
+            } else if(tuple.getSecond().is(EType.LKR)){
+                if(!(tuple.getFirst().is(EType.UL) || tuple.getFirst().is(EType.INIT))){
+                    result.add(tuple);
+                }
+                if(tuple.getFirst().is(EType.INIT) && ((Init)tuple.getFirst()).getValue().toString().equals("1")){
+                    result.add(tuple);
+                }
+            }
+        }
+        return result;
+    }
+
+    private BoolExpr encodeLockConstraints(){
+        BoolExpr enc = ctx.mkTrue();
+        Set<Tuple> unlockTuples = getTuplesWithUnlock();
+        if(!unlockTuples.isEmpty()){
+            Set<MemEvent> unlocks = new HashSet<>();
+            for(Tuple tuple : unlockTuples){
+                unlocks.add((MemEvent) tuple.getFirst());
+            }
+
+            for(MemEvent unlock : unlocks){
+                List<Tuple> tuples = new ArrayList<>(maxTupleSet.getByFirst(unlock));
+                if(!tuples.isEmpty()){
+                    int num = tuples.size();
+                    int unlockId = unlock.getCId();
+                    MemEvent lock = (MemEvent)tuples.get(0).getSecond();
+                    BoolExpr lastEdge = edge("rf", unlock, lock, ctx);
+
+                    // At most one lock can read from an unlock event
+                    BoolExpr atMostOne = ctx.mkEq(mkM(unlockId, 0), ctx.mkFalse());
+
+                    // Either exists a lock reading from this unlock or all locks for the same variable are already satisfied
+                    BoolExpr atLeastOne = lastEdge;
+                    BoolExpr none = ctx.mkOr(
+                            lock.executes(ctx),
+                            ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
+                    );
+
+                    for(int i = 1; i < num; i++){
+                        lock = (MemEvent)tuples.get(i).getSecond();
+                        BoolExpr edge = edge("rf", unlock, lock, ctx);
+                        atMostOne = ctx.mkAnd(atMostOne, ctx.mkEq(mkM(unlockId, i), ctx.mkOr(mkM(unlockId, i - 1), lastEdge)));
+                        atMostOne = ctx.mkAnd(atMostOne, ctx.mkNot(ctx.mkAnd(edge, mkM(unlockId, i))));
+                        atLeastOne = ctx.mkOr(atLeastOne, edge);
+                        none = ctx.mkAnd(none, ctx.mkOr(
+                                lock.executes(ctx),
+                                ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
+                        ));
+                        lastEdge = edge;
+                    }
+
+                    enc = ctx.mkAnd(enc, atMostOne);
+                    enc = ctx.mkAnd(enc, ctx.mkImplies(unlock.executes(ctx), ctx.mkOr(atLeastOne, none)));
+                }
+            }
+        }
+        return enc;
+    }
+
+    private TupleSet getTuplesWithUnlock(){
+        TupleSet result = new TupleSet();
+        for(Tuple tuple : getMaxTupleSet()){
+            if(tuple.getFirst().is(EType.UL)
+                    || (tuple.getFirst().is(EType.INIT) && tuple.getSecond().is(EType.LKR))){
+                result.add(tuple);
+            }
+        }
+        return result;
+    }
+
+    private BoolExpr mkM(int unlockId, int i) {
+        return (BoolExpr) ctx.mkConst("m(" + unlockId + "," + i + ")", ctx.mkBoolSort());
     }
 }

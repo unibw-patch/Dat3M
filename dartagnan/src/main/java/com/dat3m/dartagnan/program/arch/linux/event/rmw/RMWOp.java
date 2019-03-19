@@ -1,4 +1,4 @@
-package com.dat3m.dartagnan.program.arch.linux.event;
+package com.dat3m.dartagnan.program.arch.linux.event.rmw;
 
 import com.dat3m.dartagnan.expression.ExprInterface;
 import com.dat3m.dartagnan.expression.IExpr;

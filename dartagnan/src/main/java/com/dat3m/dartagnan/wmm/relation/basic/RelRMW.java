@@ -4,8 +4,8 @@ import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.program.Thread;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.MemEvent;
-import com.dat3m.dartagnan.program.event.rmw.RMWStore;
 import com.dat3m.dartagnan.program.arch.aarch64.utils.EType;
+import com.dat3m.dartagnan.program.event.utils.EventWithPartner;
 import com.dat3m.dartagnan.wmm.filter.FilterAbstract;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import com.dat3m.dartagnan.wmm.filter.FilterIntersection;
@@ -50,7 +50,7 @@ public class RelRMW extends BasicRelation {
             baseMaxTupleSet = new TupleSet();
             FilterAbstract filter = FilterIntersection.get(FilterBasic.get(EType.RMW), FilterBasic.get(EType.WRITE));
             for(Event store : program.getCache().getEvents(filter)){
-                baseMaxTupleSet.add(new Tuple(((RMWStore)store).getLoadEvent(), store));
+                baseMaxTupleSet.add(new Tuple(((EventWithPartner)store).getPartner(), store));
             }
 
             maxTupleSet = new TupleSet();

@@ -10,7 +10,9 @@ import com.dat3m.dartagnan.parsers.program.utils.ParsingException;
 import com.dat3m.dartagnan.parsers.program.utils.ProgramBuilder;
 import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.program.Register;
-import com.dat3m.dartagnan.program.arch.linux.event.*;
+import com.dat3m.dartagnan.program.arch.linux.event.lock.SpinLock;
+import com.dat3m.dartagnan.program.arch.linux.event.lock.SpinUnlock;
+import com.dat3m.dartagnan.program.arch.linux.event.rmw.*;
 import com.dat3m.dartagnan.program.event.*;
 import com.dat3m.dartagnan.program.memory.Address;
 import com.dat3m.dartagnan.program.memory.Location;
@@ -432,6 +434,18 @@ public class VisitorLitmusC
     @Override
     public Object visitNreFence(LitmusCParser.NreFenceContext ctx){
         return programBuilder.addChild(currentThread, new Fence(ctx.name));
+    }
+
+    @Override
+    public Object visitNreSpinLock(LitmusCParser.NreSpinLockContext ctx){
+        programBuilder.addChild(currentThread, new SpinLock(getAddress(ctx.address)));
+        return null;
+    }
+
+    @Override
+    public Object visitNreSpinUnlock(LitmusCParser.NreSpinUnlockContext ctx){
+        programBuilder.addChild(currentThread, new SpinUnlock(getAddress(ctx.address)));
+        return null;
     }
 
 
