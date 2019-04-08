@@ -11,8 +11,8 @@ import com.microsoft.z3.Context;
 public class SpinUnlock extends MemEvent {
 
     public SpinUnlock(IExpr address) {
-        super(address);
-        addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.WRITE, EType.UL, Mo.RELEASE);
+        super(address, Mo.RELEASE);
+        addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.WRITE, EType.UL);
     }
 
     private SpinUnlock(SpinUnlock other){

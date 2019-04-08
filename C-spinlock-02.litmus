@@ -1,0 +1,19 @@
+C spinlock-02
+
+{}
+
+P0(spinlock_t* lock_x, volatile int* a) {
+  spin_lock(lock_x);
+  int r1 = READ_ONCE(*a);
+  WRITE_ONCE(*a, r1 + 1);
+  spin_unlock(lock_x);
+}
+
+P1(spinlock_t* lock_x, volatile int* a) {
+  spin_lock(lock_x);
+  int r1 = READ_ONCE(*a);
+  WRITE_ONCE(*a, r1 + 1);
+  spin_unlock(lock_x);
+}
+
+exists (a == 2)

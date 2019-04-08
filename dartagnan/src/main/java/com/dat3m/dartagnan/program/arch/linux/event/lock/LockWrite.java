@@ -16,9 +16,9 @@ public class LockWrite extends MemEvent implements EventWithPartner {
     private final LockRead lockRead;
 
     LockWrite(LockRead lockRead, IExpr address) {
-        super(address);
+        super(address, Mo.RELAXED);
         this.lockRead = lockRead;
-        addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.WRITE, EType.RMW, EType.LKW, Mo.RELAXED);
+        addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.WRITE, EType.RMW, EType.LKW);
     }
 
     @Override

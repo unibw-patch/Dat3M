@@ -14,8 +14,8 @@ import java.util.LinkedList;
 public class SpinLock extends MemEvent {
 
     public SpinLock(IExpr address) {
-        super(address);
-        addFilters(EType.ANY, EType.MEMORY, EType.RMW, EType.READ, EType.WRITE, EType.LKR, EType.LKW, Mo.ACQUIRE);
+        super(address, Mo.ACQUIRE);
+        addFilters(EType.ANY, EType.MEMORY, EType.RMW, EType.READ, EType.WRITE, EType.LKR, EType.LKW);
     }
 
     private SpinLock(SpinLock other) {

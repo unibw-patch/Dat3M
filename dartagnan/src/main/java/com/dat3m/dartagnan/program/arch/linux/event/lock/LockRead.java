@@ -14,8 +14,8 @@ import com.microsoft.z3.Context;
 public class LockRead extends MemEvent {
 
     LockRead(IExpr address) {
-        super(address);
-        addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.READ, EType.RMW, EType.LKR, Mo.ACQUIRE);
+        super(address, Mo.ACQUIRE);
+        addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.READ, EType.RMW, EType.LKR);
     }
 
     @Override
