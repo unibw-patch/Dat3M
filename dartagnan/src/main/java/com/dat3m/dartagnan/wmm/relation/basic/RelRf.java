@@ -141,7 +141,7 @@ public class RelRf extends Relation {
                     // Either exists a lock reading from this unlock or all locks for the same variable are already satisfied
                     BoolExpr atLeastOne = lastEdge;
                     BoolExpr none = ctx.mkOr(
-                            lock.executes(ctx),
+                            ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
                             ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
                     );
 
@@ -152,7 +152,7 @@ public class RelRf extends Relation {
                         atMostOne = ctx.mkAnd(atMostOne, ctx.mkNot(ctx.mkAnd(edge, mkM(unlockId, i))));
                         atLeastOne = ctx.mkOr(atLeastOne, edge);
                         none = ctx.mkAnd(none, ctx.mkOr(
-                                lock.executes(ctx),
+                                ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
                                 ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
                         ));
                         lastEdge = edge;
