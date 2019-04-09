@@ -3,6 +3,7 @@ package com.dat3m.dartagnan.program.arch.linux.event.lock;
 import com.dat3m.dartagnan.expression.ExprInterface;
 import com.dat3m.dartagnan.expression.IConst;
 import com.dat3m.dartagnan.expression.IExpr;
+import com.dat3m.dartagnan.program.arch.linux.event.lock.utils.State;
 import com.dat3m.dartagnan.program.arch.linux.utils.EType;
 import com.dat3m.dartagnan.program.arch.linux.utils.Mo;
 import com.dat3m.dartagnan.program.event.Event;
@@ -38,12 +39,12 @@ public class LockWrite extends MemEvent implements EventWithPartner {
 
     @Override
     public ExprInterface getMemValue(){
-        return new IConst(1);
+        return new IConst(State.TAKEN);
     }
 
     @Override
     public void initialise(Context ctx) {
-        memValueExpr = new IConst(1).toZ3Int(this, ctx);
+        memValueExpr = new IConst(State.TAKEN).toZ3Int(this, ctx);
         memAddressExpr = address.toZ3Int(this, ctx);
     }
 
