@@ -110,6 +110,7 @@ public class RelRf extends Relation {
                 if(!(tuple.getFirst().is(EType.UL) || tuple.getFirst().is(EType.INIT))){
                     result.add(tuple);
                 }
+                // TODO: Proper value type
                 if(tuple.getFirst().is(EType.INIT) && ((Init)tuple.getFirst()).getValue().toString().equals("1")){
                     result.add(tuple);
                 }
@@ -120,7 +121,8 @@ public class RelRf extends Relation {
 
     private BoolExpr encodeLockConstraints(){
         BoolExpr enc = ctx.mkTrue();
-        Set<Tuple> unlockTuples = getTuplesWithUnlock();
+        TupleSet unlockTuples = getUnlockToLockTuples();
+
         if(!unlockTuples.isEmpty()){
             Set<MemEvent> unlocks = new HashSet<>();
             for(Tuple tuple : unlockTuples){
@@ -128,7 +130,7 @@ public class RelRf extends Relation {
             }
 
             for(MemEvent unlock : unlocks){
-                List<Tuple> tuples = new ArrayList<>(maxTupleSet.getByFirst(unlock));
+                List<Tuple> tuples = new ArrayList<>(unlockTuples.getByFirst(unlock));
                 if(!tuples.isEmpty()){
                     int num = tuples.size();
                     int unlockId = unlock.getCId();
@@ -166,11 +168,11 @@ public class RelRf extends Relation {
         return enc;
     }
 
-    private TupleSet getTuplesWithUnlock(){
+    private TupleSet getUnlockToLockTuples(){
         TupleSet result = new TupleSet();
         for(Tuple tuple : getMaxTupleSet()){
-            if(tuple.getFirst().is(EType.UL)
-                    || (tuple.getFirst().is(EType.INIT) && tuple.getSecond().is(EType.LKR))){
+            if((tuple.getFirst().is(EType.UL) || tuple.getFirst().is(EType.INIT))
+                    && tuple.getSecond().is(EType.LKR)){
                 result.add(tuple);
             }
         }
