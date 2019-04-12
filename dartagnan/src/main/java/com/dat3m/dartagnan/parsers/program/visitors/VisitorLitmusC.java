@@ -10,6 +10,7 @@ import com.dat3m.dartagnan.parsers.program.utils.ParsingException;
 import com.dat3m.dartagnan.parsers.program.utils.ProgramBuilder;
 import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.program.Register;
+import com.dat3m.dartagnan.program.arch.linux.event.lock.SpinIsLocked;
 import com.dat3m.dartagnan.program.arch.linux.event.lock.SpinLock;
 import com.dat3m.dartagnan.program.arch.linux.event.lock.SpinUnlock;
 import com.dat3m.dartagnan.program.arch.linux.event.rmw.*;
@@ -297,6 +298,15 @@ public class VisitorLitmusC
         programBuilder.addChild(currentThread, event);
         return register;
     }
+
+    @Override
+    public IExpr visitReSpinIsLocked(LitmusCParser.ReSpinIsLockedContext ctx){
+        Register register = getReturnRegister(true);
+        Event event = new SpinIsLocked(register, getAddress(ctx.address));
+        programBuilder.addChild(currentThread, event);
+        return register;
+    }
+
 
     // ----------------------------------------------------------------------------------------------------------------
     // Return expressions (register for return value is optional)

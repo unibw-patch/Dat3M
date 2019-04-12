@@ -127,7 +127,7 @@ re locals [IOpBin op, String mo]
     |   Ast address = re {$mo = "NA";}                                                                                  # reReadNa
 
 //    |   SpinTrylock LPar address = re RPar                                                                            # reSpinTryLock
-//    |   SpiIsLocked LPar address = re RPar                                                                            # reSpinIsLocked
+    |   SpiIsLocked LPar address = re RPar                                                                              # reSpinIsLocked
 
     |   Excl re                                                                                                         # reOpBoolNot
     |   re opBool re                                                                                                    # reOpBool

@@ -1,0 +1,17 @@
+C C-spinlock-09-2.litmus
+{
+  spinlock_t x_lock;
+}
+
+P0(spinlock_t *x_lock)
+{
+    int r0 = spin_is_locked(x_lock);
+}
+
+P1(spinlock_t *x_lock)
+{
+    spin_lock(x_lock);
+    spin_unlock(x_lock);
+}
+
+exists 0:r0=1;

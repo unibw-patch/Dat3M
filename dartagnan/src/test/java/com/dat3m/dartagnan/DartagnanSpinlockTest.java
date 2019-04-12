@@ -64,7 +64,7 @@ public class DartagnanSpinlockTest {
 
     @Test
     public void test() {
-        try{
+        try {
             Program program = new ProgramParser().parse(input);
             Context ctx = new Context();
             Solver solver = ctx.mkSolver(ctx.mkTactic(Dartagnan.TACTIC));

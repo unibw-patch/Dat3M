@@ -1,5 +1,6 @@
 package com.dat3m.dartagnan.wmm.relation.basic;
 
+import com.dat3m.dartagnan.program.arch.linux.event.lock.utils.State;
 import com.dat3m.dartagnan.program.arch.linux.utils.EType;
 import com.dat3m.dartagnan.program.event.Init;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
@@ -104,16 +105,24 @@ public class RelRf extends Relation {
     private TupleSet getIllegalLockTuples(TupleSet tupleSet){
         TupleSet result = new TupleSet();
         for(Tuple tuple : tupleSet){
-            if(tuple.getFirst().is(EType.LKW)){
+            Event e1 = tuple.getFirst();
+            Event e2 = tuple.getSecond();
+            boolean isLegal;
+
+            if(e1.is(EType.LKW)){
+                isLegal = e2.is(EType.LF);
+            } else if(e1.is(EType.UL)){
+                isLegal = e2.is(EType.LKR) || e2.is(EType.RU);
+            } else if(e1.is(EType.INIT)){
+                int value = Integer.parseInt(((Init)tuple.getFirst()).getValue().toString());
+                isLegal = (!e2.is(EType.LF) || value == State.TAKEN)
+                        && ((!e2.is(EType.LKR) && !e2.is(EType.RU)) || value == State.FREE);
+            } else {
+                isLegal = !e2.is(EType.LKR) && !e2.is(EType.LF) && !e2.is(EType.RU);
+            }
+
+            if(!isLegal){
                 result.add(tuple);
-            } else if(tuple.getSecond().is(EType.LKR)){
-                if(!(tuple.getFirst().is(EType.UL) || tuple.getFirst().is(EType.INIT))){
-                    result.add(tuple);
-                }
-                // TODO: Proper value type
-                if(tuple.getFirst().is(EType.INIT) && ((Init)tuple.getFirst()).getValue().toString().equals("1")){
-                    result.add(tuple);
-                }
             }
         }
         return result;
