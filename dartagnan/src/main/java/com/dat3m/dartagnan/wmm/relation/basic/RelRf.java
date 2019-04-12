@@ -107,16 +107,22 @@ public class RelRf extends Relation {
         for(Tuple tuple : tupleSet){
             Event e1 = tuple.getFirst();
             Event e2 = tuple.getSecond();
-            boolean isLegal;
+            boolean isLegal = true;
 
             if(e1.is(EType.LKW)){
                 isLegal = e2.is(EType.LF);
             } else if(e1.is(EType.UL)){
                 isLegal = e2.is(EType.LKR) || e2.is(EType.RU);
             } else if(e1.is(EType.INIT)){
-                int value = Integer.parseInt(((Init)tuple.getFirst()).getValue().toString());
-                isLegal = (!e2.is(EType.LF) || value == State.TAKEN)
-                        && ((!e2.is(EType.LKR) && !e2.is(EType.RU)) || value == State.FREE);
+                if(e2.is(EType.LF) || e2.is(EType.LKR) || e2.is(EType.RU)){
+                    try {
+                        int value = Integer.parseInt(((Init)tuple.getFirst()).getValue().toString());
+                        isLegal = (!e2.is(EType.LF) || value == State.TAKEN)
+                                && ((!e2.is(EType.LKR) && !e2.is(EType.RU)) || value == State.FREE);
+                    } catch (NumberFormatException e){
+                        throw new RuntimeException("Initial value of a lock must be an integer");
+                    }
+                }
             } else {
                 isLegal = !e2.is(EType.LKR) && !e2.is(EType.LF) && !e2.is(EType.RU);
             }

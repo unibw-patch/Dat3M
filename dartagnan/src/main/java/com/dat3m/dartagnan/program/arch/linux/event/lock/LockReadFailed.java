@@ -18,6 +18,7 @@ import com.microsoft.z3.IntExpr;
 public class LockReadFailed extends MemEvent implements RegWriter {
 
     private final Register resultRegister;
+    private IntExpr regResultExpr;
 
     LockReadFailed(Register register, IExpr address) {
         super(address, Mo.RELAXED);
@@ -44,6 +45,7 @@ public class LockReadFailed extends MemEvent implements RegWriter {
     public void initialise(Context ctx) {
         memValueExpr = new IConst(State.TAKEN).toZ3Int(this, ctx);
         memAddressExpr = address.toZ3Int(this, ctx);
+        regResultExpr = new IConst(1).toZ3Int(ctx);
     }
 
     @Override
@@ -53,7 +55,7 @@ public class LockReadFailed extends MemEvent implements RegWriter {
 
     @Override
     public IntExpr getResultRegisterExpr(){
-        return memValueExpr;
+        return regResultExpr;
     }
 
 
