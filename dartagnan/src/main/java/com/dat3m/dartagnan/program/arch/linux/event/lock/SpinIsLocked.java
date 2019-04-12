@@ -3,7 +3,6 @@ package com.dat3m.dartagnan.program.arch.linux.event.lock;
 import com.dat3m.dartagnan.expression.Atom;
 import com.dat3m.dartagnan.expression.IConst;
 import com.dat3m.dartagnan.expression.IExpr;
-import com.dat3m.dartagnan.expression.op.BOpBin;
 import com.dat3m.dartagnan.expression.op.COpBin;
 import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.arch.linux.event.lock.utils.State;
@@ -26,17 +25,12 @@ public class SpinIsLocked extends MemEvent implements RegWriter {
     public SpinIsLocked(Register register, IExpr address) {
         super(address, Mo.ACQUIRE);
         this.resultRegister = register;
-        addFilters(EType.ANY, EType.MEMORY, EType.READ, EType.LF, EType.RU);
+        addFilters(EType.ANY, EType.MEMORY, EType.READ, EType.LF, EType.RU, EType.REG_WRITER);
     }
 
     private SpinIsLocked(SpinIsLocked other) {
         super(other);
         this.resultRegister = other.resultRegister;
-    }
-
-    @Override
-    public Register getResultRegister(){
-        return resultRegister;
     }
 
     @Override
@@ -47,6 +41,11 @@ public class SpinIsLocked extends MemEvent implements RegWriter {
     @Override
     public String label(){
         return "IsLocked_*" + address;
+    }
+
+    @Override
+    public Register getResultRegister(){
+        return resultRegister;
     }
 
 

@@ -1,9 +1,9 @@
 package com.dat3m.dartagnan.wmm.relation.basic;
 
+import com.dat3m.dartagnan.program.arch.linux.event.lock.LockReadSuccess;
 import com.dat3m.dartagnan.program.arch.linux.event.lock.utils.State;
 import com.dat3m.dartagnan.program.arch.linux.utils.EType;
 import com.dat3m.dartagnan.program.event.Init;
-import com.dat3m.dartagnan.program.event.utils.EventWithPartner;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import com.dat3m.dartagnan.wmm.filter.FilterMinus;
 import com.microsoft.z3.BoolExpr;
@@ -160,7 +160,7 @@ public class RelRf extends Relation {
                     BoolExpr atLeastOne = lastEdge;
 
                     BoolExpr none = ctx.mkTrue();
-                    if(((EventWithPartner)lock).getPartner() == null){
+                    if(!(lock instanceof LockReadSuccess)) {
                         none = ctx.mkAnd(none, ctx.mkOr(
                                 ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
                                 ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
@@ -174,7 +174,7 @@ public class RelRf extends Relation {
                         atMostOne = ctx.mkAnd(atMostOne, ctx.mkNot(ctx.mkAnd(edge, mkM(unlockId, i))));
                         atLeastOne = ctx.mkOr(atLeastOne, edge);
 
-                        if(((EventWithPartner)lock).getPartner() == null) {
+                        if(!(lock instanceof LockReadSuccess)) {
                             none = ctx.mkAnd(none, ctx.mkOr(
                                     ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
                                     ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))

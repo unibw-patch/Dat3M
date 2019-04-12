@@ -457,11 +457,7 @@ public class VisitorLitmusC
 
     @Override
     public Object visitNreSpinLock(LitmusCParser.NreSpinLockContext ctx){
-        // The register will be passed to LKR.
-        // For spin_lock, LKR does not need a return register, but it is required for spin_try_lock
-        // TODO: Generate register during compilation (after compiler is implemented)
-        Register register = programBuilder.getOrCreateRegister(scope, null);
-        programBuilder.addChild(currentThread, new SpinLock(register, getAddress(ctx.address)));
+        programBuilder.addChild(currentThread, new SpinLock(getAddress(ctx.address)));
         return null;
     }
 

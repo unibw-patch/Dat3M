@@ -13,6 +13,7 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 
+// The failed (read from taken lock) partner of spin_trylock() and spin_is_locked()
 public class LockReadFailed extends LockBase implements RegWriter {
 
     private final Register resultRegister;

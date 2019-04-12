@@ -7,14 +7,14 @@ import com.dat3m.dartagnan.program.arch.linux.event.lock.utils.State;
 import com.dat3m.dartagnan.program.arch.linux.utils.EType;
 import com.dat3m.dartagnan.program.arch.linux.utils.Mo;
 import com.dat3m.dartagnan.program.event.Event;
-import com.dat3m.dartagnan.program.event.utils.EventWithPartner;
 import com.dat3m.dartagnan.program.event.utils.RegWriter;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 
-public class LockReadUnlock extends LockBase implements RegWriter, EventWithPartner {
+// The successful (read from free lock) partner of spin_is_locked()
+public class LockReadUnlock extends LockBase implements RegWriter {
 
     private final LockReadFailed failedEvent;
     private final Register resultRegister;
@@ -24,11 +24,6 @@ public class LockReadUnlock extends LockBase implements RegWriter, EventWithPart
         this.failedEvent = failedEvent;
         this.resultRegister = register;
         addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.READ, EType.RU, EType.REG_WRITER);
-    }
-
-    @Override
-    public LockReadFailed getPartner(){
-        return failedEvent;
     }
 
     @Override
