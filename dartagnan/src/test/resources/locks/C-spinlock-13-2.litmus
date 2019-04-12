@@ -1,0 +1,41 @@
+C C-spinlock-13-2.litmus
+{
+  atomic_t x = 0;
+  atomic_t y = 0;
+  spinlock_t x_lock;
+  spinlock_t y_lock;
+}
+
+P0(intptr_t *x, intptr_t *y, spinlock_t *x_lock, spinlock_t *y_lock)
+{
+    int r0 = spin_trylock(x_lock);
+    if(r0){
+        int r2 = READ_ONCE(*x);
+        WRITE_ONCE(*x, r2 + 1);
+        spin_unlock(x_lock);
+    }
+    int r1 = spin_trylock(y_lock);
+    if(r1){
+        int r3 = READ_ONCE(*y);
+        WRITE_ONCE(*y, r3 + 1);
+        spin_unlock(y_lock);
+    }
+}
+
+P1(intptr_t *x, intptr_t *y, spinlock_t *x_lock, spinlock_t *y_lock)
+{
+    int r0 = spin_trylock(y_lock);
+    if(r0){
+        int r2 = READ_ONCE(*y);
+        WRITE_ONCE(*y, r2 + 1);
+        spin_unlock(y_lock);
+    }
+    int r1 = spin_trylock(x_lock);
+    if(r1){
+        int r3 = READ_ONCE(*x);
+        WRITE_ONCE(*x, r3 + 1);
+        spin_unlock(x_lock);
+    }
+}
+
+exists x=0 /\ y=0

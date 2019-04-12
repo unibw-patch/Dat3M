@@ -1,0 +1,25 @@
+C C-spinlock-12-2.litmus
+{
+  atomic_t x = 0;
+  spinlock_t x_lock;
+}
+
+P0(intptr_t *x, spinlock_t *x_lock)
+{
+    spin_lock(x_lock);
+    int r0 = READ_ONCE(*x);
+    WRITE_ONCE(*x, r0 + 1);
+    spin_unlock(x_lock);
+}
+
+P1(intptr_t *x, spinlock_t *x_lock)
+{
+    int r0 = spin_trylock(x_lock);
+    if(r0 > 0){
+        int r1 = READ_ONCE(*x);
+        WRITE_ONCE(*x, r1 + 1);
+        spin_unlock(x_lock);
+    }
+}
+
+exists (1:r0=0 /\ x=1)
