@@ -66,7 +66,7 @@ public class SpinTryLock extends MemEvent implements RegWriter {
     public int compile(Arch target, int nextId, Event predecessor) {
         if(target == Arch.NONE) {
             LockReadFailed lockReadFailed = new LockReadFailed(resultRegister, address);
-            LockRead lockRead = new LockReadSuccess(lockReadFailed, resultRegister, address);
+            LockReadSuccess lockRead = new LockReadSuccess(lockReadFailed, resultRegister, address);
             LinkedList<Event> events = new LinkedList<>();
             events.add(lockReadFailed);
             events.add(lockRead);

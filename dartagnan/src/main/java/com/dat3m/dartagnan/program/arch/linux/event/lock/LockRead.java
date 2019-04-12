@@ -15,7 +15,7 @@ public class LockRead extends LockBase {
 
     LockRead(IExpr address) {
         super(address, Mo.ACQUIRE, new IConst(State.FREE));
-        addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.READ, EType.RMW, EType.LKR);
+        addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.READ, EType.RMW, EType.LKR, EType.BL);
     }
 
     @Override

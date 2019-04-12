@@ -1,6 +1,5 @@
 package com.dat3m.dartagnan.wmm.relation.basic;
 
-import com.dat3m.dartagnan.program.arch.linux.event.lock.LockReadSuccess;
 import com.dat3m.dartagnan.program.arch.linux.event.lock.utils.State;
 import com.dat3m.dartagnan.program.arch.linux.utils.EType;
 import com.dat3m.dartagnan.program.event.Init;
@@ -156,30 +155,31 @@ public class RelRf extends Relation {
                     // At most one lock can read from an unlock event
                     BoolExpr atMostOne = ctx.mkEq(mkM(unlockId, 0), ctx.mkFalse());
 
-                    // Either exists a lock reading from this unlock or all locks for the same variable are already satisfied
+                    // Exists a lock reading from this unlock
                     BoolExpr atLeastOne = lastEdge;
 
+                    // A (blocking) read is already satisfied or addresses does not match this unlock
                     BoolExpr none = ctx.mkTrue();
-                    if(!(lock instanceof LockReadSuccess)) {
-                        none = ctx.mkAnd(none, ctx.mkOr(
-                                ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
-                                ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
-                        ));
+                    if(lock.is(EType.BL)) {
+                        none = ctx.mkAnd(none, noReadUnlockLock(unlock, lock));
                     }
 
                     for(int i = 1; i < num; i++){
                         lock = (MemEvent)tuples.get(i).getSecond();
                         BoolExpr edge = edge("rf", unlock, lock, ctx);
+
+                        // At most one lock can read from an unlock event
                         atMostOne = ctx.mkAnd(atMostOne, ctx.mkEq(mkM(unlockId, i), ctx.mkOr(mkM(unlockId, i - 1), lastEdge)));
                         atMostOne = ctx.mkAnd(atMostOne, ctx.mkNot(ctx.mkAnd(edge, mkM(unlockId, i))));
+
+                        // Exists a lock reading from this unlock
                         atLeastOne = ctx.mkOr(atLeastOne, edge);
 
-                        if(!(lock instanceof LockReadSuccess)) {
-                            none = ctx.mkAnd(none, ctx.mkOr(
-                                    ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
-                                    ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
-                            ));
+                        // A (blocking) read is already satisfied or addresses does not match this unlock
+                        if(lock.is(EType.BL)) {
+                            none = ctx.mkAnd(none, noReadUnlockLock(unlock, lock));
                         }
+
                         lastEdge = edge;
                     }
 
@@ -189,6 +189,13 @@ public class RelRf extends Relation {
             }
         }
         return enc;
+    }
+
+    private BoolExpr noReadUnlockLock(MemEvent unlock, MemEvent lock){
+        return ctx.mkOr(
+                ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
+                ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
+        );
     }
 
     private TupleSet getUnlockToLockTuples(){

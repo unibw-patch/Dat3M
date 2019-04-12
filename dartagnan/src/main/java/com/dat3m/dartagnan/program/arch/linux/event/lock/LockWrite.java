@@ -12,9 +12,9 @@ import com.dat3m.dartagnan.wmm.utils.Arch;
 // The write partner of spin_lock() and spin_trylock()
 public class LockWrite extends LockBase implements EventWithPartner {
 
-    private final LockRead lockRead;
+    private final Event lockRead;
 
-    LockWrite(LockRead lockRead, IExpr address) {
+    LockWrite(Event lockRead, IExpr address) {
         super(address, Mo.RELAXED, new IConst(State.TAKEN));
         this.lockRead = lockRead;
         addFilters(EType.ANY, EType.VISIBLE, EType.MEMORY, EType.WRITE, EType.RMW, EType.LKW);
@@ -31,7 +31,7 @@ public class LockWrite extends LockBase implements EventWithPartner {
     }
 
     @Override
-    public LockRead getPartner(){
+    public Event getPartner(){
         return lockRead;
     }
 
