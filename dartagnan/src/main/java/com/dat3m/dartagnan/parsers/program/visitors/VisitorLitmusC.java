@@ -12,6 +12,7 @@ import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.arch.linux.event.lock.SpinIsLocked;
 import com.dat3m.dartagnan.program.arch.linux.event.lock.SpinLock;
+import com.dat3m.dartagnan.program.arch.linux.event.lock.SpinTryLock;
 import com.dat3m.dartagnan.program.arch.linux.event.lock.SpinUnlock;
 import com.dat3m.dartagnan.program.arch.linux.event.rmw.*;
 import com.dat3m.dartagnan.program.event.*;
@@ -300,6 +301,14 @@ public class VisitorLitmusC
     }
 
     @Override
+    public IExpr visitReSpinTryLock(LitmusCParser.ReSpinTryLockContext ctx){
+        Register register = getReturnRegister(true);
+        Event event = new SpinTryLock(register, getAddress(ctx.address));
+        programBuilder.addChild(currentThread, event);
+        return register;
+    }
+
+    @Override
     public IExpr visitReSpinIsLocked(LitmusCParser.ReSpinIsLockedContext ctx){
         Register register = getReturnRegister(true);
         Event event = new SpinIsLocked(register, getAddress(ctx.address));
@@ -448,7 +457,11 @@ public class VisitorLitmusC
 
     @Override
     public Object visitNreSpinLock(LitmusCParser.NreSpinLockContext ctx){
-        programBuilder.addChild(currentThread, new SpinLock(getAddress(ctx.address)));
+        // The register will be passed to LKR.
+        // For spin_lock, LKR does not need a return register, but it is required for spin_try_lock
+        // TODO: Generate register during compilation (after compiler is implemented)
+        Register register = programBuilder.getOrCreateRegister(scope, null);
+        programBuilder.addChild(currentThread, new SpinLock(register, getAddress(ctx.address)));
         return null;
     }
 

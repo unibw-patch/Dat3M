@@ -3,6 +3,7 @@ package com.dat3m.dartagnan.wmm.relation.basic;
 import com.dat3m.dartagnan.program.arch.linux.event.lock.utils.State;
 import com.dat3m.dartagnan.program.arch.linux.utils.EType;
 import com.dat3m.dartagnan.program.event.Init;
+import com.dat3m.dartagnan.program.event.utils.EventWithPartner;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
 import com.dat3m.dartagnan.wmm.filter.FilterMinus;
 import com.microsoft.z3.BoolExpr;
@@ -157,10 +158,14 @@ public class RelRf extends Relation {
 
                     // Either exists a lock reading from this unlock or all locks for the same variable are already satisfied
                     BoolExpr atLeastOne = lastEdge;
-                    BoolExpr none = ctx.mkOr(
-                            ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
-                            ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
-                    );
+
+                    BoolExpr none = ctx.mkTrue();
+                    if(((EventWithPartner)lock).getPartner() == null){
+                        none = ctx.mkAnd(none, ctx.mkOr(
+                                ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
+                                ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
+                        ));
+                    }
 
                     for(int i = 1; i < num; i++){
                         lock = (MemEvent)tuples.get(i).getSecond();
@@ -168,10 +173,13 @@ public class RelRf extends Relation {
                         atMostOne = ctx.mkAnd(atMostOne, ctx.mkEq(mkM(unlockId, i), ctx.mkOr(mkM(unlockId, i - 1), lastEdge)));
                         atMostOne = ctx.mkAnd(atMostOne, ctx.mkNot(ctx.mkAnd(edge, mkM(unlockId, i))));
                         atLeastOne = ctx.mkOr(atLeastOne, edge);
-                        none = ctx.mkAnd(none, ctx.mkOr(
-                                ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
-                                ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
-                        ));
+
+                        if(((EventWithPartner)lock).getPartner() == null) {
+                            none = ctx.mkAnd(none, ctx.mkOr(
+                                    ctx.mkOr(ctx.mkNot(ctx.mkBoolConst(lock.cfVar())), lock.executes(ctx)),
+                                    ctx.mkNot(ctx.mkEq(unlock.getMemAddressExpr(), lock.getMemAddressExpr()))
+                            ));
+                        }
                         lastEdge = edge;
                     }
 

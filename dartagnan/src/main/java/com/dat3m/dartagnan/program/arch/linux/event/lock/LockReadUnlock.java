@@ -20,7 +20,6 @@ public class LockReadUnlock extends MemEvent implements RegWriter, EventWithPart
 
     private final LockReadFailed failedEvent;
     private final Register resultRegister;
-    private IntExpr regResultExpr;
 
     LockReadUnlock(LockReadFailed failedEvent, Register register, IExpr address) {
         super(address, Mo.RELAXED);
@@ -36,7 +35,7 @@ public class LockReadUnlock extends MemEvent implements RegWriter, EventWithPart
 
     @Override
     public String toString() {
-        return "lock_read_unlock(*" + address + ")";
+        return resultRegister + " = lock_read_unlock(*" + address + ")";
     }
 
     @Override
@@ -53,7 +52,6 @@ public class LockReadUnlock extends MemEvent implements RegWriter, EventWithPart
     public void initialise(Context ctx) {
         memValueExpr = new IConst(State.FREE).toZ3Int(this, ctx);
         memAddressExpr = address.toZ3Int(this, ctx);
-        regResultExpr = new IConst(0).toZ3Int(ctx);
     }
 
     @Override
@@ -63,7 +61,7 @@ public class LockReadUnlock extends MemEvent implements RegWriter, EventWithPart
 
     @Override
     public IntExpr getResultRegisterExpr(){
-        return regResultExpr;
+        return memValueExpr;
     }
 
 

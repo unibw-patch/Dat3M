@@ -126,7 +126,7 @@ re locals [IOpBin op, String mo]
     |   ReadOnce LPar Ast address = re RPar {$mo = "Once";}                                                             # reReadOnce
     |   Ast address = re {$mo = "NA";}                                                                                  # reReadNa
 
-//    |   SpinTrylock LPar address = re RPar                                                                            # reSpinTryLock
+    |   SpinTrylock LPar address = re RPar                                                                              # reSpinTryLock
     |   SpiIsLocked LPar address = re RPar                                                                              # reSpinIsLocked
 
     |   Excl re                                                                                                         # reOpBoolNot
@@ -157,8 +157,8 @@ nre locals [IOpBin op, String mo, String name]
     |   Ast? varName Equals re                                                                                          # nreAssignment
     |   typeSpecifier varName (Equals re)?                                                                              # nreRegDeclaration
 
-    |   SpinLock LPar address = re RPar                                                                                # nreSpinLock
-    |   SpinUnlock LPar address = re RPar                                                                              # nreSpinUnlock
+    |   SpinLock LPar address = re RPar                                                                                 # nreSpinLock
+    |   SpinUnlock LPar address = re RPar                                                                               # nreSpinUnlock
 //    |   SpinUnlockWait LPar address = re RPar                                                                         # nreSpinUnlockWait
 
     |   ( FenceSmpMb LPar RPar {$name = "Mb";}
