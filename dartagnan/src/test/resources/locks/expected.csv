@@ -30,3 +30,10 @@ C-spinlock-13-2.litmus,0
 C-spinlock-14-1.litmus,1
 C-spinlock-14-2.litmus,1
 C-spinlock-14-3.litmus,0
+C-spinlock-15-1.litmus,0
+C-spinlock-15-2.litmus,1
+C-spinlock-16-1.litmus,1
+C-spinlock-16-2.litmus,0
+C-spinlock-16-3.litmus,1
+C-spinlock-16-4.litmus,1
+C-spinlock-16-5.litmus,0

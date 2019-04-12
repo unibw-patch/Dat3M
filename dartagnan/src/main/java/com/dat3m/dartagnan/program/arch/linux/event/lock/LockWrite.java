@@ -8,6 +8,8 @@ import com.dat3m.dartagnan.program.arch.linux.utils.Mo;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.utils.EventWithPartner;
 import com.dat3m.dartagnan.wmm.utils.Arch;
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Context;
 
 // The write partner of spin_lock() and spin_trylock()
 public class LockWrite extends LockBase implements EventWithPartner {
@@ -51,5 +53,14 @@ public class LockWrite extends LockBase implements EventWithPartner {
     @Override
     public int compile(Arch target, int nextId, Event predecessor) {
         throw new RuntimeException("LockWrite cannot be compiled: event must be generated during compilation");
+    }
+
+
+    // Encoding
+    // -----------------------------------------------------------------------------------------------------------------
+
+    @Override
+    protected BoolExpr encodeExec(Context ctx){
+        return ctx.mkEq(executes(ctx), lockRead.executes(ctx));
     }
 }
