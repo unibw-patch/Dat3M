@@ -1,0 +1,20 @@
+C C-spinlock-06-1.litmus
+{
+  atomic_t x = 0;
+  spinlock_t x_lock = 1;
+}
+
+P0(intptr_t *x, spinlock_t *x_lock)
+{
+    spin_lock(x_lock);
+    WRITE_ONCE(*x, 4);
+    spin_unlock(x_lock);
+}
+
+P1(intptr_t *x, spinlock_t *x_lock)
+{
+    WRITE_ONCE(*x, 3);
+    spin_unlock(x_lock);
+}
+
+forall x=4

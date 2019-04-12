@@ -1,32 +1,43 @@
-C C-spinlock-03-2.litmus
+C C-spinlock-04-2.litmus
 {
   atomic_t x = 0;
   spinlock_t x_lock;
+  spinlock_t y_lock;
 }
 
-P0(intptr_t *x, spinlock_t *x_lock)
+P0(intptr_t *x, spinlock_t *x_lock, spinlock_t *y_lock)
 {
     int r0;
     spin_lock(x_lock);
+    spin_lock(y_lock);
     r0 = READ_ONCE(*x);
     WRITE_ONCE(*x, r0 + 1);
+    spin_unlock(y_lock);
     spin_unlock(x_lock);
+
     spin_lock(x_lock);
+    spin_lock(y_lock);
     r0 = READ_ONCE(*x);
     WRITE_ONCE(*x, r0 + 1);
     spin_unlock(x_lock);
+    spin_unlock(y_lock);
 }
 
-P1(intptr_t *x, spinlock_t *x_lock)
+P1(intptr_t *x, spinlock_t *x_lock, spinlock_t *y_lock)
 {
     int r0;
     spin_lock(x_lock);
+    spin_lock(y_lock);
     r0 = READ_ONCE(*x);
     WRITE_ONCE(*x, r0 + 1);
     spin_unlock(x_lock);
+    spin_unlock(y_lock);
+
     spin_lock(x_lock);
+    spin_lock(y_lock);
     r0 = READ_ONCE(*x);
     WRITE_ONCE(*x, r0 + 1);
+    spin_unlock(y_lock);
     spin_unlock(x_lock);
 }
 

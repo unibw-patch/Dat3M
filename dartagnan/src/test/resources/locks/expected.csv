@@ -5,3 +5,10 @@ C-spinlock-02-2.litmus,0
 C-spinlock-02-3.litmus,1
 C-spinlock-03-1.litmus,1
 C-spinlock-03-2.litmus,0
+C-spinlock-04-1.litmus,1
+C-spinlock-04-2.litmus,0
+C-spinlock-05-1.litmus,1
+C-spinlock-05-2.litmus,0
+C-spinlock-06-1.litmus,1
+C-spinlock-06-2.litmus,1
+C-spinlock-06-3.litmus,1
