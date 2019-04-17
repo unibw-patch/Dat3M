@@ -31,7 +31,7 @@ public class DartagnanSpinlockTest {
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Iterable<Object[]> data() throws IOException {
         ImmutableMap<String, Boolean> expected = readExpectedResults();
-        Wmm wmm = new ParserCat().parse(ResourceHelper.CAT_RESOURCE_PATH + "cat/linux-kernel.cat");
+        Wmm wmm = new ParserCat().parse(new File(ResourceHelper.CAT_RESOURCE_PATH + "cat/linux-kernel.cat"));
 
         return Files.walk(Paths.get(ResourceHelper.TEST_RESOURCE_PATH + "locks/"))
                 .filter(Files::isRegularFile)
