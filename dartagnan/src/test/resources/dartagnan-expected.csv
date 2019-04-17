@@ -13301,3 +13301,5 @@ litmus/C/auto/C-RW-R+RW-R+RW-G+RW-G+RW-G+RW-G+RW-R+RW-R+RW-R+RW-R+RW-G+RW-G+RW-G
 litmus/C/auto/C-RW-G+RW-G+RW-R+RW-R+RW-R+RW-R+RW-G+RW-G+RW-G+RW-G+RW-R+RW-R+RW-R+RW-R+RW-G+RW-G+RW-R.litmus,1
 litmus/C/manual/atomic/C-lock-write1.litmus,0
 litmus/C/manual/atomic/C-trylock2.litmus,1
+litmus/C/manual/kernel/after-unlock-lock-same-lock-variable.litmus,0
+litmus/C/manual/kernel/after-unlock-lock-same-cpu.litmus,0
