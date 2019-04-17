@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,12 +53,12 @@ public class DartagnanSpinlockTest {
         return builder.build();
     }
 
-    private String input;
+    private String path;
     private Wmm wmm;
     private boolean expected;
 
-    public DartagnanSpinlockTest(String input, boolean expected, Wmm wmm) {
-        this.input = input;
+    public DartagnanSpinlockTest(String path, boolean expected, Wmm wmm) {
+        this.path = path;
         this.expected = expected;
         this.wmm = wmm;
     }
@@ -65,7 +66,7 @@ public class DartagnanSpinlockTest {
     @Test
     public void test() {
         try {
-            Program program = new ProgramParser().parse(input);
+            Program program = new ProgramParser().parse(new File(path));
             Context ctx = new Context();
             Solver solver = ctx.mkSolver(ctx.mkTactic(Dartagnan.TACTIC));
             assertEquals(expected, Dartagnan.testProgram(solver, ctx, program, wmm, Arch.NONE, 1, Mode.KNASTER, Alias.NONE));
