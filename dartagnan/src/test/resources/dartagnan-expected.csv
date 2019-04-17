@@ -13297,3 +13297,7 @@ litmus/X86/x86-e1.litmus,1
 litmus/X86/x86-m1.litmus,1
 litmus/X86/x86-m4.litmus,1
 litmus/X86/x86-m4s.litmus,1
+litmus/C/auto/C-RW-R+RW-R+RW-G+RW-G+RW-G+RW-G+RW-R+RW-R+RW-R+RW-R+RW-G+RW-G+RW-G+RW-G+RW-R+RW-R+RW-G.litmus,0
+litmus/C/auto/C-RW-G+RW-G+RW-R+RW-R+RW-R+RW-R+RW-G+RW-G+RW-G+RW-G+RW-R+RW-R+RW-R+RW-R+RW-G+RW-G+RW-R.litmus,1
+litmus/C/manual/atomic/C-lock-write1.litmus,0
+litmus/C/manual/atomic/C-trylock2.litmus,1
