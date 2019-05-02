@@ -67,9 +67,11 @@ let fence = strong-fence | wmb | po-rel | rmb | acq-po
 let ppo = to-r | to-w | fence | (po-unlock-rf-lock-po & int)
 
 (* Propagation: Ordering from release operations and strong fences. *)
-(* Orig:
-    let A-cumul(r) = rfe? ; r
-    let cumul-fence = A-cumul(strong-fence | po-rel) | wmb | po-unlock-rf-lock-po *)
+(* Orig
+let A-cumul(r) = rfe? ; r
+let cumul-fence = A-cumul(strong-fence | po-rel) | wmb | po-unlock-rf-lock-po
+*)
+
 let cumul-fence = (rfe? ; (strong-fence | po-rel)) | wmb | po-unlock-rf-lock-po
 let prop = (overwrite & ext)? ; cumul-fence* ; rfe?
 
@@ -129,4 +131,4 @@ irreflexive rb as rcu
  *
  * let xb = hb | pb | rb
  * acyclic xb as executes-before
- *)
+*)
