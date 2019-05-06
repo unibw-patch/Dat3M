@@ -3,6 +3,7 @@ package com.dat3m.dartagnan.program.arch.linux.event.lock;
 import com.dat3m.dartagnan.expression.IConst;
 import com.dat3m.dartagnan.expression.IExpr;
 import com.dat3m.dartagnan.program.arch.linux.event.lock.utils.State;
+import com.dat3m.dartagnan.program.arch.linux.event.lock.utils.Utils;
 import com.dat3m.dartagnan.program.arch.linux.utils.EType;
 import com.dat3m.dartagnan.program.arch.linux.utils.Mo;
 import com.dat3m.dartagnan.program.event.Event;
@@ -61,6 +62,6 @@ public class LockWrite extends LockBase implements EventWithPartner {
 
     @Override
     protected BoolExpr encodeExec(Context ctx){
-        return ctx.mkEq(executes(ctx), lockRead.executes(ctx));
+        return ctx.mkEq(executes(ctx), Utils.isLockObtainedVar(lockRead, ctx));
     }
 }
