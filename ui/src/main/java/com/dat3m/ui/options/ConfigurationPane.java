@@ -44,7 +44,7 @@ public class ConfigurationPane extends JFrame implements ActionListener {
 		SortedSet<Location> locations = mkLocations();
 		if(locations != null){
 			setTitle("Configuration");
-			setMinimumSize(new Dimension(200, 0));
+			setMinimumSize(new Dimension(230, 0));
 			JPanel panel = new JPanel(new GridLayout(locations.size(), 0));
 			for(Location loc : locations){
 				LocationConfiguration conf = confs.get(loc);

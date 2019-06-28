@@ -2,6 +2,10 @@ package com.dat3m.dartagnan.program.memory;
 
 import java.util.HashMap;
 
+import com.dat3m.dartagnan.expression.IConst;
+
+import static com.dat3m.dartagnan.program.memory.utils.SecurityLevel.LOW;
+
 public class DomainConfiguration extends HashMap<Location, LocationConfiguration> {
 
 	public LocationConfiguration get(Location loc) {
@@ -12,7 +16,7 @@ public class DomainConfiguration extends HashMap<Location, LocationConfiguration
 				return super.get(key);
 			}
 		}
-		throw new RuntimeException("The domain of " + loc.getName() + " has not been defined");
+		return new LocationConfiguration(LOW, new IConst(0), new IConst(0));
 	}
 
 	public LocationConfiguration put(Location loc, LocationConfiguration conf) {
