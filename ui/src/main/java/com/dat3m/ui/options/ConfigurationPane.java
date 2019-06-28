@@ -17,7 +17,7 @@ import javax.swing.JSplitPane;
 import com.dat3m.dartagnan.expression.IConst;
 import com.dat3m.dartagnan.parsers.program.ProgramParser;
 import com.dat3m.dartagnan.program.Program;
-import com.dat3m.dartagnan.program.memory.Configuration;
+import com.dat3m.dartagnan.program.memory.DomainConfiguration;
 import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.memory.LocationConfiguration;
 import com.dat3m.dartagnan.program.memory.utils.SecurityLevel;
@@ -30,13 +30,13 @@ import static com.dat3m.ui.utils.Utils.showError;
 public class ConfigurationPane extends JFrame implements ActionListener {
 
 	private Editor programEditor;
-	private Configuration confs = new Configuration();
+	private DomainConfiguration confs = new DomainConfiguration();
 	
 	public void setProgramEditor(Editor editor){
 		programEditor = editor;
 	}
 
-	public Configuration getConfiguration(){
+	public DomainConfiguration getConfiguration(){
 		return confs;
 	}
 
@@ -117,7 +117,7 @@ public class ConfigurationPane extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals(EditorCode.PROGRAM.editorActionCommand())) {
-			confs = new Configuration();
+			confs = new DomainConfiguration();
 		}
 		if(e.getActionCommand().equals(ControlCode.BOUND.actionCommand()) || e.getActionCommand().equals("comboBoxChanged")) {
 			LocationConfigurationPane pane = (LocationConfigurationPane)((Component)e.getSource()).getParent().getParent();

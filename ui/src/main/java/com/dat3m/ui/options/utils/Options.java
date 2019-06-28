@@ -1,6 +1,6 @@
 package com.dat3m.ui.options.utils;
 
-import com.dat3m.dartagnan.program.memory.Configuration;
+import com.dat3m.dartagnan.program.memory.DomainConfiguration;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 import com.dat3m.dartagnan.wmm.utils.Mode;
 import com.dat3m.dartagnan.wmm.utils.alias.Alias;
@@ -19,10 +19,10 @@ public class Options {
 	private final int bound;
 	private final boolean drawGraph;
 	private final ImmutableSet<String> relations;
-	private final Configuration configurations;
+	private final DomainConfiguration configurations;
 
 	public Options(Task task, Arch target, Arch source, Mode mode, Alias alias, int bound,
-			boolean drawGraph, Collection<String> relations, Configuration configurations) {
+			boolean drawGraph, Collection<String> relations, DomainConfiguration configurations) {
 		this.task = task;
 		this.source = source;
 		this.target = target;
@@ -66,7 +66,7 @@ public class Options {
 		return relations;
 	}
 
-	public Configuration getConfigurations(){
+	public DomainConfiguration getConfigurations(){
 		return configurations;
 	}
 

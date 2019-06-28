@@ -7,7 +7,7 @@ import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.Init;
 import com.dat3m.dartagnan.program.memory.Address;
-import com.dat3m.dartagnan.program.memory.Configuration;
+import com.dat3m.dartagnan.program.memory.DomainConfiguration;
 import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.wmm.filter.FilterBasic;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 class Encodings {
 
-	static BoolExpr encodeLowEquivalentInit(Program p1, Program p2, Configuration confs, Context ctx) {
+	static BoolExpr encodeLowEquivalentInit(Program p1, Program p2, DomainConfiguration confs, Context ctx) {
         Iterator<Event> it1 = p1.getCache().getEvents(FilterBasic.get(EType.INIT)).iterator();
         Iterator<Event> it2 = p2.getCache().getEvents(FilterBasic.get(EType.INIT)).iterator();
 
@@ -45,7 +45,7 @@ class Encodings {
         return enc;
 	}
 	
-	static BoolExpr encodeLowDiffFinal(Program p1, Program p2, Configuration confs, Context ctx) {
+	static BoolExpr encodeLowDiffFinal(Program p1, Program p2, DomainConfiguration confs, Context ctx) {
 		Iterator<Location> it1 = p1.getLocations().stream().filter(e -> confs.get(((Location)e)).getSecurity().equals(LOW)).iterator();
 		Iterator<Location> it2 = p2.getLocations().stream().filter(e -> confs.get(((Location)e)).getSecurity().equals(LOW)).iterator();
 
@@ -62,7 +62,7 @@ class Encodings {
         return enc;
 	}
 	
-	static public BoolExpr encodeReachedLowState(Program p, Configuration confs, Model model, Context ctx) {
+	static public BoolExpr encodeReachedLowState(Program p, DomainConfiguration confs, Model model, Context ctx) {
 		BoolExpr reachedState = ctx.mkTrue();
 		Iterator<Location> it = p.getLocations().stream().filter(e -> confs.get(((Location)e)).getSecurity().equals(LOW)).iterator();
         while(it.hasNext()) {
@@ -75,7 +75,7 @@ class Encodings {
 		return reachedState;
 	}
 
-	static public BoolExpr encodeInitStateFromModel(Program p, Configuration confs, Model model, Context ctx) {
+	static public BoolExpr encodeInitStateFromModel(Program p, DomainConfiguration confs, Model model, Context ctx) {
 		BoolExpr initState = ctx.mkTrue();
         Iterator<Event> it = p.getCache().getEvents(FilterBasic.get(EType.INIT)).iterator();
 		Set<Address> adds = p.getLocations().stream().filter(e -> confs.get(((Location)e)).getSecurity().equals(HIGH)).map(e -> ((Location)e).getAddress()).collect(Collectors.toSet());
