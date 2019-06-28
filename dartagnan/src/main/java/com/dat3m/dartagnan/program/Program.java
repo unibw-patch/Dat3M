@@ -11,7 +11,7 @@ import com.dat3m.dartagnan.asserts.AbstractAssert;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.Init;
 import com.dat3m.dartagnan.program.event.utils.RegWriter;
-import com.dat3m.dartagnan.program.memory.Configuration;
+import com.dat3m.dartagnan.program.memory.DomainConfiguration;
 import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.memory.Memory;
 
@@ -177,7 +177,7 @@ public class Program {
         return enc;
     }
 
-    public BoolExpr encodeDomain(Context ctx, Configuration conf){
+    public BoolExpr encodeDomain(Context ctx, DomainConfiguration conf){
         BoolExpr enc = ctx.mkTrue();
         
         if(conf != null) {

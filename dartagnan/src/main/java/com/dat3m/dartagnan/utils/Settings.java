@@ -1,6 +1,6 @@
 package com.dat3m.dartagnan.utils;
 
-import com.dat3m.dartagnan.program.memory.Configuration;
+import com.dat3m.dartagnan.program.memory.DomainConfiguration;
 import com.dat3m.dartagnan.wmm.utils.Mode;
 import com.dat3m.dartagnan.wmm.utils.alias.Alias;
 import com.google.common.base.Joiner;
@@ -23,7 +23,7 @@ public class Settings {
     private Mode mode;
     private Alias alias;
     private int bound;
-    private Configuration configuration;
+    private DomainConfiguration configuration;
     
     private boolean draw = false;
     private ImmutableSet<String> relations = ImmutableSet.of();
@@ -34,14 +34,14 @@ public class Settings {
             put(FLAG_CAN_ACCESS_UNINITIALIZED_MEMORY, false);
     }};
 
-    public Settings(Mode mode, Alias alias, int bound, Configuration configuration){
+    public Settings(Mode mode, Alias alias, int bound, DomainConfiguration configuration){
         this.mode = mode == null ? Mode.KNASTER : mode;
         this.alias = alias == null ? Alias.CFIS : alias;
         this.bound = Math.max(1, bound);
         this.configuration = configuration;
     }
 
-    public Settings(Mode mode, Alias alias, int bound, Configuration configuration, boolean draw, Collection<String> relations){
+    public Settings(Mode mode, Alias alias, int bound, DomainConfiguration configuration, boolean draw, Collection<String> relations){
         this(mode, alias, bound, configuration);
         if(draw){
             this.draw = true;
@@ -57,7 +57,7 @@ public class Settings {
         }
     }
 
-    public Settings(Mode mode, Alias alias, int bound, Configuration configuration, boolean draw, String... relations){
+    public Settings(Mode mode, Alias alias, int bound, DomainConfiguration configuration, boolean draw, String... relations){
         this(mode, alias, bound, configuration, draw, Arrays.asList(relations));
     }
 
@@ -73,7 +73,7 @@ public class Settings {
         return bound;
     }
 
-    public Configuration getConfiguration(){
+    public DomainConfiguration getConfiguration(){
         return configuration;
     }
 
