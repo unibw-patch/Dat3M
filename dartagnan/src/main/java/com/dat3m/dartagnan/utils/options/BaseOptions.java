@@ -95,7 +95,7 @@ public abstract class BaseOptions extends Options {
                 throw new UnsupportedOperationException("Illegal unroll value");
             }
         }
-        settings = new Settings(mode, alias, bound, draw, relations);
+        settings = new Settings(mode, alias, bound, null, draw, relations);
     }
 
     protected void parseGraphFilePath(CommandLine cmd){

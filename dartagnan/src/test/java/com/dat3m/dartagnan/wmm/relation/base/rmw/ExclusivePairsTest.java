@@ -30,7 +30,7 @@ public class ExclusivePairsTest {
 
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Iterable<Object[]> data() throws IOException {
-        Settings settings = new Settings(Mode.KNASTER, Alias.CFIS, 1);
+        Settings settings = new Settings(Mode.KNASTER, Alias.CFIS, 1, null);
         Wmm wmm = new ParserCat().parse(new File(ResourceHelper.CAT_RESOURCE_PATH + "cat/aarch64.cat"));
         String path = ResourceHelper.TEST_RESOURCE_PATH + "wmm/relation/basic/rmw/aarch64/";
 

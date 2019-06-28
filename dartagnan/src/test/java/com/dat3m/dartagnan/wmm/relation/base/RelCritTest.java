@@ -62,7 +62,7 @@ public class RelCritTest {
             Program program = new ProgramParser().parse(new File(path));
 
             // Force encoding all possible "crit" relations
-            Settings settings = new Settings(Mode.KNASTER, Alias.CFIS, 1, true, "crit");
+            Settings settings = new Settings(Mode.KNASTER, Alias.CFIS, 1, null, true, "crit");
 
             // Sanity check, can be skipped
             assertTrue(Dartagnan.testProgram(solver, ctx, program, wmm, program.getArch(), settings));

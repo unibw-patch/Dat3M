@@ -10,13 +10,13 @@ import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.MemEvent;
 
-public class Location implements ExprInterface {
+public class Location implements ExprInterface, Comparable<Location> {
 
 	public static final int DEFAULT_INIT_VALUE = 0;
 
 	private final String name;
 	private final Address address;
-
+	
 	public Location(String name, Address address) {
 		this.name = name;
 		this.address = address;
@@ -91,5 +91,10 @@ public class Location implements ExprInterface {
 			return ((MemEvent) e).getMemValue().getBoolValue(e, ctx, model);
 		}
 		throw new RuntimeException("Attempt to encode memory value for illegal event");
+	}
+
+	@Override
+	public int compareTo(Location loc) {
+		return this.name.compareTo(loc.getName());
 	}
 }

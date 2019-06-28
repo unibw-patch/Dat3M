@@ -9,7 +9,9 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.dat3m.dartagnan.asserts.AbstractAssert;
 import com.dat3m.dartagnan.program.event.Event;
+import com.dat3m.dartagnan.program.event.Init;
 import com.dat3m.dartagnan.program.event.utils.RegWriter;
+import com.dat3m.dartagnan.program.memory.Configuration;
 import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.memory.Memory;
 
@@ -172,6 +174,31 @@ public class Program {
                         ctx.mkEq(reg.getLastValueExpr(ctx), ((RegWriter)events.get(i)).getResultRegisterExpr())));
             }
         }
+        return enc;
+    }
+
+    public BoolExpr encodeDomain(Context ctx, Configuration conf){
+        BoolExpr enc = ctx.mkTrue();
+        
+        if(conf != null) {
+            Iterator<Event> it = getCache().getEvents(FilterBasic.get(EType.INIT)).iterator();        
+            while(it.hasNext()) {
+            	Init i = (Init)it.next();
+            	for(Location loc : getLocations()) {
+            		// The program and the configuration are coming from different parsing and thus Objects are different. 
+            		// We compare based on their String representation that is unique.
+            		if(loc.getAddress().toString().equals(i.getAddress().toString())) {
+                       	enc = ctx.mkAnd(enc, ctx.mkGe(i.getMemValueExpr(), conf.get(loc).getMinBound().toZ3Int(ctx)));        		
+                       	enc = ctx.mkAnd(enc, ctx.mkLe(i.getMemValueExpr(), conf.get(loc).getMaxBound().toZ3Int(ctx)));        		        			        				
+            		}
+            	}
+            }        	
+        } else {
+        	for(Event e : getCache().getEvents(FilterBasic.get(EType.INIT))){
+                enc = ctx.mkAnd(enc, ((Init)e).getDomianExpr());
+            }        	
+        }
+
         return enc;
     }
 }

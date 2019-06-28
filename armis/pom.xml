@@ -6,38 +6,28 @@
   <parent>
     <artifactId>dat3m</artifactId>
     <groupId>com.dat3m</groupId>
-    <version>2.0.4</version>
+    <version>2.0.3</version>
   </parent>
 
-  <groupId>com.dat3m.ui</groupId>
-  <artifactId>ui</artifactId>
+  <groupId>com.dat3m.armis</groupId>
+  <artifactId>armis</artifactId>
   <packaging>jar</packaging>
   
-  <name>ui</name>
+  <name>armis</name>
 
   <dependencies>
+    <dependency>
+      <groupId>com.dat3m.dartagnan</groupId>
+      <artifactId>dartagnan</artifactId>
+      <version>2.0.4</version>
+    </dependency>
     <dependency>
     	<groupId>com.dat3m.porthos</groupId>
     	<artifactId>porthos</artifactId>
     	<version>2.0.4</version>
     </dependency>
-    <dependency>
-	    <groupId>guru.nidi</groupId>
-    	<artifactId>graphviz-java</artifactId>
-    	<version>0.8.3</version>
-	</dependency>
-	<dependency>
-    	<groupId>ch.qos.logback</groupId>
-    	<artifactId>logback-classic</artifactId>
-    	<version>1.2.3</version>
-	</dependency>
-	<dependency>
-		<groupId>com.dat3m.armis</groupId>
-		<artifactId>armis</artifactId>
-		<version>2.0.3</version>
-	</dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -63,7 +53,7 @@
             <configuration>
               <archive>
                 <manifest>
-                  <mainClass>com.dat3m.ui.Dat3M</mainClass>
+                  <mainClass>com.dat3m.armis.Armis</mainClass>
                 </manifest>
               </archive>
               <descriptorRefs>

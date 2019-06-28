@@ -15,7 +15,6 @@ import org.apache.commons.cli.*;
 
 import java.io.File;
 import java.io.IOException;
-
 import static com.dat3m.porthos.Encodings.encodeCommonExecutions;
 import static com.dat3m.porthos.Encodings.encodeReachedState;
 
@@ -83,23 +82,27 @@ public class Porthos {
         BoolExpr sourceCF = pSource.encodeCF(ctx);
         BoolExpr sourceFV = pSource.encodeFinalRegisterValues(ctx);
         BoolExpr sourceMM = sourceWmm.encode(pSource, ctx, settings);
-
+        BoolExpr sourceDomain = pSource.encodeDomain(ctx, settings.getConfiguration());
+        
         s1.add(pTarget.encodeCF(ctx));
         s1.add(pTarget.encodeFinalRegisterValues(ctx));
         s1.add(targetWmm.encode(pTarget, ctx, settings));
         s1.add(targetWmm.consistent(pTarget, ctx));
-
+        s1.add(pTarget.encodeDomain(ctx, settings.getConfiguration()));
+        
         s1.add(sourceCF);
         s1.add(sourceFV);
         s1.add(sourceMM);
         s1.add(sourceWmm.inconsistent(pSource, ctx));
-
+        s1.add(sourceDomain);
+        
         s1.add(encodeCommonExecutions(pTarget, pSource, ctx));
 
         s2.add(sourceCF);
         s2.add(sourceFV);
         s2.add(sourceMM);
         s2.add(sourceWmm.consistent(pSource, ctx));
+        s2.add(sourceDomain);
 
         boolean isPortable = true;
         int iterations = 1;

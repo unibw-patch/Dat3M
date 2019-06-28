@@ -31,9 +31,9 @@ public abstract class AbstractDartagnanTest {
         Map<String, Boolean> expectationMap = ResourceHelper.getExpectedResults();
         Wmm wmm = new ParserCat().parse(new File(ResourceHelper.CAT_RESOURCE_PATH + cat));
 
-        Settings s1 = new Settings(Mode.KNASTER, Alias.CFIS, 1);
-        Settings s2 = new Settings(Mode.IDL, Alias.CFIS, 1);
-        Settings s3 = new Settings(Mode.KLEENE, Alias.CFIS, 1);
+        Settings s1 = new Settings(Mode.KNASTER, Alias.CFIS, 1, null);
+        Settings s2 = new Settings(Mode.IDL, Alias.CFIS, 1, null);
+        Settings s3 = new Settings(Mode.KLEENE, Alias.CFIS, 1, null);
 
         return Files.walk(Paths.get(ResourceHelper.LITMUS_RESOURCE_PATH + litmusPath))
                 .filter(Files::isRegularFile)

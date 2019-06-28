@@ -15,6 +15,7 @@ import com.dat3m.ui.utils.UiOptions;
 import com.dat3m.ui.options.OptionsPane;
 import com.dat3m.ui.options.utils.ControlCode;
 import com.dat3m.ui.result.Dat3mResult;
+import com.dat3m.ui.result.NonInterferenceResult;
 import com.dat3m.ui.result.PortabilityResult;
 import com.dat3m.ui.result.ReachabilityResult;
 import com.dat3m.ui.options.utils.Task;
@@ -63,6 +64,8 @@ public class Dat3M extends JFrame implements ActionListener {
 
 		// ArchPane needs to know which program format has been loaded by editor in order to show / hide target
 		editorsPane.getEditor(EditorCode.PROGRAM).addActionListener(optionsPane.getArchManager());
+		// ConfigurationPane needs to clear the configuration when a new program is loaded
+		editorsPane.getEditor(EditorCode.PROGRAM).addActionListener(optionsPane.getConfigurationPane());
 
 		// Start listening to button events
 		optionsPane.getTestButton().addActionListener(this);
@@ -80,6 +83,7 @@ public class Dat3M extends JFrame implements ActionListener {
 
         optionsPane.getRelSelector().setSourceWmmEditor(editorsPane.getEditor(EditorCode.SOURCE_MM));
         optionsPane.getRelSelector().setTargetWmmEditor(editorsPane.getEditor(EditorCode.TARGET_MM));
+        optionsPane.getConfigurationPane().setProgramEditor(editorsPane.getEditor(EditorCode.PROGRAM));
 
 		pack();
 	}
@@ -112,22 +116,28 @@ public class Dat3M extends JFrame implements ActionListener {
 			try {
 				Editor programEditor = editorsPane.getEditor(EditorCode.PROGRAM);
 				Program program = new ProgramParser().parse(programEditor.getEditorPane().getText(), programEditor.getLoadedFormat());
+				Program sourceProgram = new ProgramParser().parse(programEditor.getEditorPane().getText(), programEditor.getLoadedFormat());
 				try {
 					Wmm targetModel = new ParserCat().parse(editorsPane.getEditor(EditorCode.TARGET_MM).getEditorPane().getText());
 					if(options.getTask() == Task.REACHABILITY){
 						testResult = new ReachabilityResult(program, targetModel, options);
 					} else {
-						try {
-							if(!programEditor.getLoadedFormat().equals("pts")) {
+						if(options.getTask() == Task.NONINTERFERENCE){
+							// This parse will never fail since it is identical to the above one that passed
+							Wmm sourceModel = new ParserCat().parse(editorsPane.getEditor(EditorCode.TARGET_MM).getEditorPane().getText());
+							testResult = new NonInterferenceResult(sourceProgram, program, sourceModel, targetModel, options);
+						} else {
+							if(options.getTask() == Task.PORTABILITY && !programEditor.getLoadedFormat().equals("pts")) {
 								showError("PORTHOS only supports *.pts files", "Loading error");
 								return;
 							}
-							Program sourceProgram = new ProgramParser().parse(programEditor.getEditorPane().getText(), programEditor.getLoadedFormat());
-							Wmm sourceModel = new ParserCat().parse(editorsPane.getEditor(EditorCode.SOURCE_MM).getEditorPane().getText());
-							testResult = new PortabilityResult(sourceProgram, program, sourceModel, targetModel, options);
-						} catch (Exception e){
-							String msg = e.getMessage() == null? "Memory model cannot be parsed" : e.getMessage();
-							showError(msg, "Source memory model error");
+							try {
+								Wmm sourceModel = new ParserCat().parse(editorsPane.getEditor(EditorCode.SOURCE_MM).getEditorPane().getText());
+								testResult = new PortabilityResult(sourceProgram, program, sourceModel, targetModel, options);
+							} catch (Exception e){
+								String msg = e.getMessage() == null? "Memory model cannot be parsed" : e.getMessage();
+								showError(msg, "Source memory model error");
+							}
 						}
 					}
 				} catch (Exception e){

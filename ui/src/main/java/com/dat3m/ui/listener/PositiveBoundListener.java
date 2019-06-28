@@ -6,11 +6,11 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import com.dat3m.ui.options.BoundField;
 
-public class BoundListener implements IBoundListener {
+public class PositiveBoundListener implements IBoundListener {
 	
 	private BoundField boundPane;
 
-	public BoundListener(BoundField pane) {
+	public PositiveBoundListener(BoundField pane) {
 		this.boundPane = pane;
 	}
 	
@@ -28,12 +28,16 @@ public class BoundListener implements IBoundListener {
 	public void keyTyped(KeyEvent e) {
 		runTest();
 	}
-
+	
 	@Override
 	public void runTest() {
 		String cText = boundPane.getText();
 		try {
-			Integer.parseInt(cText);
+			int cBound = Integer.parseInt(cText);
+			if(cBound <= 0) {
+				showError("The bound should be greater than 1", "Option error");
+				boundPane.setText(boundPane.getStableBound());
+			}
 			boundPane.setStableBound(cText);			
 		} catch (Exception e) {
 			// Empty string is allowed here to allow deleting. It will be handled by focusLost
@@ -41,7 +45,7 @@ public class BoundListener implements IBoundListener {
 				return;
 			}
 			boundPane.setText(boundPane.getStableBound());
-			showError("The bound should be an integer", "Option error");
+			showError("The bound should be greater than 1", "Option error");
 		}
 	}
 
@@ -54,7 +58,7 @@ public class BoundListener implements IBoundListener {
 	public void focusLost(FocusEvent arg0) {
 		if(boundPane.getText().equals("")) {
 			boundPane.setText(boundPane.getStableBound());
-			showError("The bound should be an integer", "Option error");
+			showError("The bound should be greater than 1", "Option error");
 		}
 	}
 }

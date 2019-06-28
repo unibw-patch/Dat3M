@@ -38,7 +38,9 @@ public class ReachabilityResult implements Dat3mResult {
         if(validate()){
             Context ctx = new Context();
             Solver solver = ctx.mkSolver();
+
             boolean result = Dartagnan.testProgram(solver, ctx, program, wmm, program.getArch(), options.getSettings());
+            
             buildVerdict(result);
             if(options.getSettings().getDrawGraph() && Dartagnan.canDrawGraph(program.getAss(), result)){
                 graph = new Graph(solver.getModel(), ctx, program, options.getSettings().getGraphRelations());

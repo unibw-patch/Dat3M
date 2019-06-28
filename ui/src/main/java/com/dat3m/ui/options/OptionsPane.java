@@ -7,6 +7,7 @@ import com.dat3m.dartagnan.wmm.utils.Mode;
 import com.dat3m.ui.button.ClearButton;
 import com.dat3m.ui.button.GraphButton;
 import com.dat3m.ui.button.RelsButton;
+import com.dat3m.ui.button.SecurityButton;
 import com.dat3m.ui.button.TestButton;
 import com.dat3m.ui.icon.IconCode;
 import com.dat3m.ui.options.utils.ArchManager;
@@ -49,10 +50,12 @@ public class OptionsPane extends JPanel implements ActionListener {
     private final JButton clearButton;
     private final GraphButton graphButton;
     private final RelsButton relsButton;
+    private final SecurityButton secButton;
 
     private final JTextPane consolePane;
 
     private final RelSelector relSelector;
+    private final ConfigurationPane configurationPane;
 
     public OptionsPane(){
         super(new GridLayout(1,0));
@@ -70,7 +73,7 @@ public class OptionsPane extends JPanel implements ActionListener {
         targetPane = new Selector<>(architectures, ControlCode.TARGET);
         archManager = new ArchManager(sourcePane, targetPane);
 
-        boundField = new BoundField();
+        boundField = new BoundField(true);
 
         testButton = new TestButton();
         clearButton = new ClearButton();
@@ -78,6 +81,9 @@ public class OptionsPane extends JPanel implements ActionListener {
 
         relSelector = new RelSelector(taskPane);
         relsButton = new RelsButton(relSelector);
+
+        configurationPane = new ConfigurationPane();
+        secButton = new SecurityButton(configurationPane);
 
         consolePane = new JTextPane();
         consolePane.setEditable(false);
@@ -127,11 +133,16 @@ public class OptionsPane extends JPanel implements ActionListener {
         return relSelector;
     }
 
+    public ConfigurationPane getConfigurationPane(){
+        return configurationPane;
+    }
+
     public UiOptions getOptions(){
         Settings settings = new Settings(
                 (Mode)modePane.getSelectedItem(),
                 (Alias)aliasPane.getSelectedItem(),
                 Integer.parseInt(boundField.getText()),
+                configurationPane.getConfiguration(),
                 graphButton.isEnabled() && graphButton.isSelected(),
                 relSelector.getSelection()
         );
@@ -168,7 +179,7 @@ public class OptionsPane extends JPanel implements ActionListener {
         graphPane.setLeftComponent(graphButton);
         graphPane.setRightComponent(relsButton);
         graphPane.setDividerSize(0);
-        JComponent[] panes = { taskPane, archPane, modePane, aliasPane, boundPane, testButton, clearButton, graphPane, scrollConsole };
+        JComponent[] panes = { taskPane, archPane, modePane, aliasPane, boundPane, testButton, clearButton, graphPane, secButton, scrollConsole };
         Iterator<JComponent> it = Arrays.asList(panes).iterator();
         JComponent current = iconPane;
         current.setBorder(emptyBorder);

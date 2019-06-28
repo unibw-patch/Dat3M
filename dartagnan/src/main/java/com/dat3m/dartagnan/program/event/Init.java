@@ -27,7 +27,9 @@ public class Init extends MemEvent {
 	@Override
 	public void initialise(Context ctx) {
 		super.initialise(ctx);
-		memValueExpr = value.toZ3Int(ctx);
+		memValueExpr = ctx.mkIntConst(address + "_init");
+		// Used when no location configuration is given
+		memDomainExpr = ctx.mkAnd(ctx.mkEq(memValueExpr, value.toZ3Int(ctx)));
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package com.dat3m.dartagnan.program.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import com.dat3m.dartagnan.expression.ExprInterface;
@@ -15,6 +16,7 @@ public abstract class MemEvent extends Event {
 
     protected IntExpr memAddressExpr;
     protected IntExpr memValueExpr;
+    protected BoolExpr memDomainExpr;
     private ImmutableSet<Address> maxAddressSet;
 
     public MemEvent(IExpr address, String mo){
@@ -52,6 +54,13 @@ public abstract class MemEvent extends Event {
             return memValueExpr;
         }
         throw new RuntimeException("Attempt to access not initialised value expression in " + this);
+    }
+
+    public BoolExpr getDomianExpr(){
+        if(memDomainExpr != null){
+            return memDomainExpr;
+        }
+        throw new RuntimeException("Attempt to access not initialised domain expression in " + this);
     }
 
     public ImmutableSet<Address> getMaxAddressSet(){

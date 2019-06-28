@@ -9,7 +9,9 @@ import java.util.Set;
 
 import javax.swing.JTextField;
 
+import com.dat3m.ui.listener.PositiveBoundListener;
 import com.dat3m.ui.listener.BoundListener;
+import com.dat3m.ui.listener.IBoundListener;
 
 public class BoundField extends JTextField {
 
@@ -17,12 +19,13 @@ public class BoundField extends JTextField {
 	
     private Set<ActionListener> actionListeners = new HashSet<>();
 
-	public BoundField() {
+	public BoundField(boolean positive) {
 		this.stableBound = "1";
 		this.setColumns(3);
-		this.setText("1");
+		this.setText(stableBound);
 
-		BoundListener listener = new BoundListener(this);
+		IBoundListener listener = positive ? new PositiveBoundListener(this) : new BoundListener(this); 
+
 		this.addKeyListener(listener);
 		this.addFocusListener(listener);
 	}
