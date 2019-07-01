@@ -195,7 +195,7 @@ public class Program {
             }        	
         } else {
         	for(Event e : getCache().getEvents(FilterBasic.get(EType.INIT))){
-                enc = ctx.mkAnd(enc, ((Init)e).getDomianExpr());
+                enc = ctx.mkAnd(enc, ((Init)e).getDomainExpr());
             }        	
         }
 

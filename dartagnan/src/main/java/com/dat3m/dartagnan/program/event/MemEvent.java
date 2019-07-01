@@ -56,7 +56,7 @@ public abstract class MemEvent extends Event {
         throw new RuntimeException("Attempt to access not initialised value expression in " + this);
     }
 
-    public BoolExpr getDomianExpr(){
+    public BoolExpr getDomainExpr(){
         if(memDomainExpr != null){
             return memDomainExpr;
         }

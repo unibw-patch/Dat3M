@@ -95,6 +95,8 @@ public abstract class BaseOptions extends Options {
                 throw new UnsupportedOperationException("Illegal unroll value");
             }
         }
+        // This is used when the program is called from the console
+        // In such a case there is no configuration and min,max = initial value 
         settings = new Settings(mode, alias, bound, null, draw, relations);
     }
 
