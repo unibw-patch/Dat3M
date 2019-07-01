@@ -1,0 +1,42 @@
+{a, b, c, d, done1, done3, e, h, x, y}
+
+thread t0 {
+x.store(_rx,1);
+}
+
+thread t1 {
+x1 = x.load(_rx);
+a.store(_rx,x1);
+y1 = y.load(_rx);
+b.store(_rx,y1);
+done1.store(_rx,1);
+}
+
+thread t2 {
+y.store(_rx,1);
+}
+
+thread t3 {
+y3 = y.load(_rx);
+c.store(_rx,y3);
+x3 = x.load(_rx);
+d.store(_rx,x3);
+done3.store(_rx,1);
+}
+
+thread t4 {
+d1 = done1.load(_rx);
+d3 = done3.load(_rx);
+if (d1 == 1 && d3 == 1) {
+  a4 = a.load(_rx);
+  b4 = b.load(_rx);
+  c4 = c.load(_rx);
+  d4 = d.load(_rx);
+  if (a4 == 1 && b4 == 0 && c4 == 1 && d4 == 0) {
+    h4= h.load(_rx);
+    e.store(_rx,h4);
+  }
+}
+}
+
+exists 4:d1 == 1 /\ 4:d3 == 1 /\ 4:a4 == 1 /\ 4:b4 == 0 /\ 4:c4 == 1 /\ 4:d4 == 0

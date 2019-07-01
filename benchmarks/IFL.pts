@@ -1,0 +1,10 @@
+{h, e}
+
+thread t0 {
+c = h.load(_rx);
+if (c == 0) {
+  e.store(_rx,0);
+} else {
+  e.store(_rx,1);
+}
+}

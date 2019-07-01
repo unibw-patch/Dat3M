@@ -1,0 +1,6 @@
+{h, e}
+
+thread t0 {
+c = h.load(_rx);
+e.store(_rx,c);
+}
