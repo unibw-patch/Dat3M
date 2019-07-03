@@ -8,12 +8,17 @@ import com.dat3m.dartagnan.expression.ExprInterface;
 import com.dat3m.dartagnan.expression.IExpr;
 import com.dat3m.dartagnan.program.event.Event;
 
+import static java.util.UUID.randomUUID;
+
+import java.util.UUID;
+
 public class Register extends IExpr implements ExprInterface {
 
 	private static int dummyCount = 0;
 
 	private final String name;
     private final int threadId;
+	private final UUID uuid = randomUUID();
 
 	public Register(String name, int threadId) {
 		if(name == null){
@@ -69,6 +74,7 @@ public class Register extends IExpr implements ExprInterface {
 
 	@Override
 	public IntExpr getLastValueExpr(Context ctx){
+		//return ctx.mkIntConst(getName() + "_" + threadId + "_" + uuid + "_final");
 		return ctx.mkIntConst(getName() + "_" + threadId + "_final");
 	}
 

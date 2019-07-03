@@ -113,7 +113,7 @@ public class Armis {
         s2.add(oneDomain);
 
         s1.add(encodeLowEquivalentInit(p2, p1, settings.getConfiguration(), ctx));
-        s1.add(encodeLowDiffFinal(p1, p2, settings.getConfiguration(), ctx));
+//        s1.add(encodeLowDiffFinal(p1, p2, settings.getConfiguration(), ctx));
 
         boolean NI = true;
         int iterations = 1;

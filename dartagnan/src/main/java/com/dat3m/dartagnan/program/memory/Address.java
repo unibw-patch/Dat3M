@@ -5,6 +5,11 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.Model;
+
+import static java.util.UUID.randomUUID;
+
+import java.util.UUID;
+
 import com.dat3m.dartagnan.expression.ExprInterface;
 import com.dat3m.dartagnan.expression.IConst;
 import com.dat3m.dartagnan.program.Register;
@@ -13,12 +18,17 @@ import com.dat3m.dartagnan.program.event.Event;
 public class Address extends IConst implements ExprInterface {
 
     private final int index;
+	private final UUID uuid = randomUUID();
 
     Address(int index){
         super(index);
         this.index = index;
     }
 
+    public UUID getUUID() {
+    	return uuid;
+    }
+    
     @Override
     public ImmutableSet<Register> getRegs(){
         return ImmutableSet.of();
@@ -35,6 +45,7 @@ public class Address extends IConst implements ExprInterface {
     }
 
     public IntExpr getLastMemValueExpr(Context ctx){
+//        return ctx.mkIntConst("last_val_at_memory_" + uuid + "_" + index);
         return ctx.mkIntConst("last_val_at_memory_" + index);
     }
 
@@ -66,11 +77,12 @@ public class Address extends IConst implements ExprInterface {
 
     @Override
     public IntExpr toZ3Int(Context ctx){
+//        return ctx.mkIntConst("memory_" + uuid + "_" + index);
         return ctx.mkIntConst("memory_" + index);
     }
 
     @Override
     public int getIntValue(Event e, Context ctx, Model model){
         return Integer.parseInt(model.getConstInterp(toZ3Int(ctx)).toString());
-    }
+    }    
 }
