@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.dat3m.dartagnan.program.event.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import com.dat3m.dartagnan.expression.Atom;
 import com.dat3m.dartagnan.expression.BConst;
@@ -86,16 +87,6 @@ import com.dat3m.dartagnan.parsers.program.utils.ProgramBuilder;
 import com.dat3m.dartagnan.program.Register;
 import com.dat3m.dartagnan.program.atomic.event.AtomicLoad;
 import com.dat3m.dartagnan.program.atomic.event.AtomicStore;
-import com.dat3m.dartagnan.program.event.Assume;
-import com.dat3m.dartagnan.program.event.Comment;
-import com.dat3m.dartagnan.program.event.CondJump;
-import com.dat3m.dartagnan.program.event.If;
-import com.dat3m.dartagnan.program.event.Label;
-import com.dat3m.dartagnan.program.event.Load;
-import com.dat3m.dartagnan.program.event.Local;
-import com.dat3m.dartagnan.program.event.Skip;
-import com.dat3m.dartagnan.program.event.Store;
-import com.dat3m.dartagnan.program.event.While;
 import com.dat3m.dartagnan.program.memory.Address;
 import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.utils.EType;
@@ -103,6 +94,8 @@ import com.dat3m.dartagnan.program.svcomp.event.BeginAtomic;
 import com.dat3m.dartagnan.program.svcomp.event.EndAtomic;
 
 public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVisitor<Object> {
+
+	private int cLine = 0;
 
 	protected ProgramBuilder programBuilder;
 	protected int threadCount = 0;
@@ -463,6 +456,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 
 	@Override
 	public Object visitAssign_cmd(Assign_cmdContext ctx) {
+		Event child;
 		// TODO: find a nicer way of dealing with this
 		if(ctx.getText().contains("$load.")) {
 			// This names are global so we don't use currentScope.getID(), but per thread.
@@ -482,7 +476,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 			ExprInterface value = (ExprInterface)exprs.expr(i).accept(this);
 	        if(value == null) {
 	        	continue;
-	        }		
+	        }
 			String name = ctx.Ident(i).getText();
 			if(constantsTypeMap.containsKey(name)) {
 				throw new ParsingException("Constants cannot be assigned: " + ctx.getText());
@@ -494,25 +488,33 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 			Register register = programBuilder.getRegister(threadCount, currentScope.getID() + ":" + name);
 	        if(register != null){
 	        	if(ctx.getText().contains("$load.")) {
-	        		programBuilder.addChild(threadCount, new Load(register, (IExpr)value, null));
+	        		child = new Load(register, (IExpr)value, null);
+					child.setCline(cLine);
+	        		programBuilder.addChild(threadCount, child);
 		            continue;
 	        	}
 	        	if(value instanceof Address) {
-	                programBuilder.addChild(threadCount, new Load(register, (Address)value, null));
+					child = new Load(register, (Address)value, null);
 	        	} else {
-		            programBuilder.addChild(threadCount, new Local(register, value));	        		
+	        		child = new Local(register, value);
 	        	}
-	            continue;
+				child.setCline(cLine);
+				programBuilder.addChild(threadCount, child);
+				continue;
 	        }
 	        Location location = programBuilder.getLocation(name);
 	        if(location != null){
-	            programBuilder.addChild(threadCount, new Store(location.getAddress(), value, null));
+				child = new Store(location.getAddress(), value, null);
+				child.setCline(cLine);
+				programBuilder.addChild(threadCount, child);
 	            continue;
 	        }
 	        if(currentReturnName.equals(name)) {
 	        	if(!returnRegister.isEmpty()) {
 	        		Register ret = returnRegister.remove(returnRegister.size() - 1);
-					programBuilder.addChild(threadCount, new Local(ret, value));
+					child = new Local(ret, value);
+					child.setCline(cLine);
+					programBuilder.addChild(threadCount, child);
 	        	}
 	        	continue;
 	        }
@@ -531,17 +533,20 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 	@Override
 	public Object visitAssume_cmd(Assume_cmdContext ctx) {
 		// We can get rid of all the "assume true" statements
+		if(ctx.getText().contains("sourceloc")) {
+			cLine = selectCline(ctx.getText());
+		}
 		if(!ctx.proposition().expr().getText().equals("true")) {
 			Label pairingLabel = null;
-			if(!pairLabels.keySet().contains(currentLabel)) {
+			if (!pairLabels.keySet().contains(currentLabel)) {
 				// If the current label doesn't have a pairing label, we jump to the end of the program
-	        	pairingLabel = programBuilder.getOrCreateLabel("END_OF_" + currentScope.getID());
+				pairingLabel = programBuilder.getOrCreateLabel("END_OF_" + currentScope.getID());
 			} else {
 				pairingLabel = pairLabels.get(currentLabel);
 			}
-			BExpr c = (BExpr)ctx.proposition().expr().accept(this);
-			if(c != null) {
-				programBuilder.addChild(threadCount, new CondJump(new BExprUn(NOT, c), pairingLabel));	
+			BExpr c = (BExpr) ctx.proposition().expr().accept(this);
+			if (c != null) {
+				programBuilder.addChild(threadCount, new CondJump(new BExprUn(NOT, c), pairingLabel));
 			}
 		}
         return null;
@@ -782,5 +787,20 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 	@Override
 	public Object visitDec(DecContext ctx) {
         throw new ParsingException("Floats are not yet supported");
+	}
+
+	public int selectCline (String ctx) {
+		int line = 0;
+		String charofc;
+		String temp1 = ctx.substring(0, ctx.indexOf(","));
+		String temp2 = ctx.substring(temp1.length() + 1, ctx.length());
+		charofc = temp2.substring(0, temp2.indexOf(","));
+
+		for(int loop = 0; loop < charofc.length(); loop ++) {
+			char temp_char = charofc.charAt(loop);
+			int temp_int = temp_char - '0';
+			line = line * 10 + temp_int;
+		}
+		return line;
 	}
 }
