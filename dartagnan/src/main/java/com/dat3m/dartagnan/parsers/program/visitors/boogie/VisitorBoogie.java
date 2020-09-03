@@ -96,6 +96,7 @@ import com.dat3m.dartagnan.program.svcomp.event.EndAtomic;
 public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVisitor<Object> {
 
 	private int cLine = 0;
+	private Event child;
 
 	protected ProgramBuilder programBuilder;
 	protected int threadCount = 0;
@@ -253,6 +254,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
    	 }
 
     public void visitProc_decl(Proc_declContext ctx, boolean create, List<ExprInterface> callingValues) {
+		cLine = -1;
     	if(ctx.proc_sign().proc_sign_out() != null) {
     		for(Attr_typed_idents_whereContext atiwC : ctx.proc_sign().proc_sign_out().attr_typed_idents_wheres().attr_typed_idents_where()) {
     			for(ParseTree ident : atiwC.typed_idents_where().typed_idents().idents().Ident()) {
@@ -269,8 +271,16 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
         		Location loc = programBuilder.getOrCreateLocation(pool.getPtrFromInt(threadCount) + "_active", -1);
         		Register reg = programBuilder.getOrCreateRegister(threadCount, null, -1);
                	Label label = programBuilder.getOrCreateLabel("END_OF_T" + threadCount);
-        		programBuilder.addChild(threadCount, new AtomicLoad(reg, loc.getAddress(), SC));
-        		programBuilder.addChild(threadCount, new Assume(new Atom(reg, EQ, new IConst(1, -1)), label));
+
+               	child = new AtomicLoad(reg, loc.getAddress(), SC);
+               	child.setCline(cLine);
+               	programBuilder.addChild(threadCount, child);
+               	//programBuilder.addChild(threadCount, new AtomicLoad(reg, loc.getAddress(), SC));
+
+				child = new Assume(new Atom(reg, EQ, new IConst(1, -1)), label);
+				child.setCline(cLine);
+				programBuilder.addChild(threadCount, child);
+        		//programBuilder.addChild(threadCount, new Assume(new Atom(reg, EQ, new IConst(1, -1)), label));
             }
     	}
 
@@ -292,7 +302,11 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
     					int precision = type.contains("bv") ? Integer.parseInt(type.split("bv")[1]) : -1;
         				Register register = programBuilder.getOrCreateRegister(threadCount, currentScope.getID() + ":" + ident.getText(), precision);
         				ExprInterface value = callingValues.get(index);
-        				programBuilder.addChild(threadCount, new Local(register, value));
+
+						child =  new Local(register, value);
+						child.setCline(cLine);
+						programBuilder.addChild(threadCount, child);
+        				//programBuilder.addChild(threadCount, new Local(register, value));
         				index++;    					
     				}
     			}
@@ -306,20 +320,27 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
         visitChildren(body.stmt_list());
 
 		Label label = programBuilder.getOrCreateLabel("END_OF_" + currentScope.getID());
+		label.setCline(cLine);
    		programBuilder.addChild(threadCount, label);
         
         currentScope = currentScope.getParent();
         
     	if(create) {
-         	if(threadCount != 1) {
+			cLine = -1;
+			if(threadCount != 1) {
          		// Used to mark the end of the execution of a thread (used by pthread_join)
         		Location loc = programBuilder.getOrCreateLocation(pool.getPtrFromInt(threadCount) + "_active", -1);
-        		programBuilder.addChild(threadCount, new AtomicStore(loc.getAddress(), new IConst(0, -1), SC));
+
+				child =  new AtomicStore(loc.getAddress(), new IConst(0, -1), SC);
+				child.setCline(cLine);
+				programBuilder.addChild(threadCount, child);
+        		//programBuilder.addChild(threadCount, new AtomicStore(loc.getAddress(), new IConst(0, -1), SC));
          	}
         	label = programBuilder.getOrCreateLabel("END_OF_T" + threadCount);
+         	label.setCline(cLine);
          	programBuilder.addChild(threadCount, label);
     	}
-    }
+	}
     
     @Override 
     public Object visitAssert_cmd(Assert_cmdContext ctx) {
@@ -333,6 +354,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
     	assertionIndex++;
     	Local event = new Local(ass, expr);
 		event.addFilters(EType.ASSERTION);
+		event.setCline(cLine);
 		programBuilder.addChild(threadCount, event);
     	return null;
     }
@@ -345,7 +367,11 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 		}
 		if(name.equals("abort")) {
 	       	Label label = programBuilder.getOrCreateLabel("END_OF_T" + threadCount);
-	       	programBuilder.addChild(threadCount, new CondJump(new BConst(true), label));
+
+			child =  new CondJump(new BConst(true), label);
+			child.setCline(cLine);
+			programBuilder.addChild(threadCount, child);
+	       	//programBuilder.addChild(threadCount, new CondJump(new BConst(true), label));
 	       	return null;
 		}
 		if(name.equals("reach_error")) {
@@ -353,6 +379,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 	    	assertionIndex++;
 	    	Local event = new Local(ass, new BConst(false));
 			event.addFilters(EType.ASSERTION);
+			event.setCline(cLine);
 			programBuilder.addChild(threadCount, event);
 			return null;
 		}
@@ -379,6 +406,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 		if(name.contains("__VERIFIER_atomic_")) {
 			atomicMode = ctx;
 			currentBeginAtomic = new BeginAtomic();
+			currentBeginAtomic.setCline(cLine);
 			programBuilder.addChild(threadCount, currentBeginAtomic);	
 			// No return, the body still needs to be parsed.
 		}
@@ -399,18 +427,30 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 			throw new ParsingException("Procedure " + name + " is not defined");
 		}
 		// Nice to have for debugging
-		programBuilder.addChild(threadCount, new Comment(" Start of " + name + " "));	
+
+		child =  new Comment(" Start of " + name + " ");
+		child.setCline(cLine);
+		programBuilder.addChild(threadCount, child);
+		//programBuilder.addChild(threadCount, new Comment(" Start of " + name + " "));
 		visitProc_decl(procedures.get(name), false, callingValues);
 		if(ctx.equals(atomicMode)) {
 			if(currentBeginAtomic == null) {
 	            throw new ParsingException("__VERIFIER_atomic_end() does not have a matching __VERIFIER_atomic_begin()");
 			}
-			programBuilder.addChild(threadCount, new EndAtomic(currentBeginAtomic));	
+
+			child =  new EndAtomic(currentBeginAtomic);
+			child.setCline(cLine);
+			programBuilder.addChild(threadCount, child);
+			//programBuilder.addChild(threadCount, new EndAtomic(currentBeginAtomic));
 			currentBeginAtomic = null;
 			atomicMode = null;
 		}
 		// Nice to have for debugging
-		programBuilder.addChild(threadCount, new Comment(" End of " + name + " "));
+
+		child =  new Comment(" End of " + name + " ");
+		child.setCline(cLine);
+		programBuilder.addChild(threadCount, child);
+		//programBuilder.addChild(threadCount, new Comment(" End of " + name + " "));
 		if(name.equals("$initialize")) {
 			initMode = false;
 		}
@@ -422,9 +462,11 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
         ExprInterface expr = (ExprInterface)ctx.guard().expr().accept(this);
         Skip exitEvent = new Skip();
         While whileEvent = new While(expr, exitEvent);
+        whileEvent.setCline(cLine);
         programBuilder.addChild(threadCount, whileEvent);
 
         visitChildren(ctx.stmt_list());
+        exitEvent.setCline(cLine);
         return programBuilder.addChild(threadCount, exitEvent);
 	}
 
@@ -434,9 +476,11 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
         Skip exitMainBranch = new Skip();
         Skip exitElseBranch = new Skip();
         If ifEvent = new If(expr, exitMainBranch, exitElseBranch);
+        ifEvent.setCline(cLine);
         programBuilder.addChild(threadCount, ifEvent);
         
         visitChildren(ctx.stmt_list(0));
+        exitMainBranch.setCline(cLine);
         programBuilder.addChild(threadCount, exitMainBranch);
 
         // case when the else branch is a stmt list
@@ -448,7 +492,8 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
         if(ctx.if_cmd() != null) {
             visitChildren(ctx.if_cmd());
         }
-        
+
+        exitElseBranch.setCline(cLine);
         programBuilder.addChild(threadCount, exitElseBranch);
         return null;
 
@@ -456,7 +501,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 
 	@Override
 	public Object visitAssign_cmd(Assign_cmdContext ctx) {
-		Event child;
+		//Event child;
 		// TODO: find a nicer way of dealing with this
 		if(ctx.getText().contains("$load.")) {
 			// This names are global so we don't use currentScope.getID(), but per thread.
@@ -526,7 +571,11 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 	@Override
 	public Object visitReturn_cmd(Return_cmdContext ctx) {
 		Label label = programBuilder.getOrCreateLabel("END_OF_" + currentScope.getID());
-		programBuilder.addChild(threadCount, new CondJump(new BConst(true), label));
+
+		child = new CondJump(new BConst(true), label);
+		child.setCline(cLine);
+		programBuilder.addChild(threadCount, child);
+		//programBuilder.addChild(threadCount, new CondJump(new BConst(true), label));
 		return null;
 	}
 
@@ -546,7 +595,11 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 			}
 			BExpr c = (BExpr) ctx.proposition().expr().accept(this);
 			if (c != null) {
-				programBuilder.addChild(threadCount, new CondJump(new BExprUn(NOT, c), pairingLabel));
+
+				child = new CondJump(new BExprUn(NOT, c), pairingLabel);
+				child.setCline(cLine);
+				programBuilder.addChild(threadCount, child);
+				//programBuilder.addChild(threadCount, new CondJump(new BExprUn(NOT, c), pairingLabel));
 			}
 		}
         return null;
@@ -558,6 +611,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 		// thus we use currentScope.getID() + ":"
 		String labelName = currentScope.getID() + ":" + ctx.children.get(0).getText();
 		Label label = programBuilder.getOrCreateLabel(labelName);
+		label.setCline(cLine);
         programBuilder.addChild(threadCount, label);
         currentLabel = label;
         return null;
@@ -568,12 +622,20 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
     	String labelName = currentScope.getID() + ":" + ctx.idents().children.get(0).getText();
     	boolean loop = programBuilder.hasLabel(labelName);
     	Label l1 = programBuilder.getOrCreateLabel(labelName);
-        programBuilder.addChild(threadCount, new CondJump(new BConst(true), l1));
+
+		child = new CondJump(new BConst(true), l1);
+		child.setCline(cLine);
+		programBuilder.addChild(threadCount, child);
+        //programBuilder.addChild(threadCount, new CondJump(new BConst(true), l1));
         // If there is a loop, we return if the loop is not completely unrolled.
         // SMACK will take care of another escape if the loop is completely unrolled.
         if(loop) {
             Label label = programBuilder.getOrCreateLabel("END_OF_" + currentScope.getID());
-            programBuilder.addChild(threadCount, new CondJump(new BConst(true), label));        	
+
+			child = new CondJump(new BConst(true), label);
+			child.setCline(cLine);
+			programBuilder.addChild(threadCount, child);
+            //programBuilder.addChild(threadCount, new CondJump(new BConst(true), label));
         }
 		if(ctx.idents().children.size() > 1) {
 			for(int index = 2; index < ctx.idents().children.size(); index = index + 2) {
@@ -714,7 +776,11 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 			if(initMode && value instanceof IConst && ((IConst)value).getValue() == 0) {
 				return null;
 			}
-			programBuilder.addChild(threadCount, new Store(address, value, null));	
+
+			child = new Store(address, value, null);
+			child.setCline(cLine);
+			programBuilder.addChild(threadCount, child);
+			//programBuilder.addChild(threadCount, new Store(address, value, null));
 			return null;
 		}
 		// push currentCall to the call stack
@@ -790,17 +856,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 	}
 
 	public int selectCline (String ctx) {
-		int line = 0;
-		String charofc;
-		String temp1 = ctx.substring(0, ctx.indexOf(","));
-		String temp2 = ctx.substring(temp1.length() + 1, ctx.length());
-		charofc = temp2.substring(0, temp2.indexOf(","));
-
-		for(int loop = 0; loop < charofc.length(); loop ++) {
-			char temp_char = charofc.charAt(loop);
-			int temp_int = temp_char - '0';
-			line = line * 10 + temp_int;
-		}
-		return line;
+		String tmp = ctx.substring(ctx.indexOf(",")+1, ctx.lastIndexOf(","));
+		return Integer.parseInt(tmp);
 	}
 }

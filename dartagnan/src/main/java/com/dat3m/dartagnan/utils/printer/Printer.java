@@ -114,7 +114,7 @@ public class Printer {
             StringBuilder idSb = new StringBuilder();
             switch(idType){
                 case ORIG:
-                    idSb.append("(").append(event.getOId()).append(")");
+                    idSb.append("(").append(event.getCline()).append(")");
                     break;
                 case UNROLLED:
                     idSb.append("[").append(event.getUId()).append("]");

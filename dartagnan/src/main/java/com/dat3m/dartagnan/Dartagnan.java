@@ -5,13 +5,16 @@ import static com.dat3m.dartagnan.utils.Result.PASS;
 import static com.dat3m.dartagnan.utils.Result.BFAIL;
 import static com.dat3m.dartagnan.utils.Result.BPASS;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
+import com.dat3m.dartagnan.program.Witness;
+import com.dat3m.dartagnan.program.event.Event;
+import com.dat3m.dartagnan.program.utils.EType;
 import com.dat3m.dartagnan.utils.printer.Printer;
+import com.dat3m.dartagnan.wmm.filter.FilterBasic;
+import com.dat3m.dartagnan.wmm.utils.Utils;
+import com.microsoft.z3.*;
 import org.apache.commons.cli.HelpFormatter;
 
 import com.dat3m.dartagnan.asserts.AbstractAssert;
@@ -26,11 +29,8 @@ import com.dat3m.dartagnan.utils.options.DartagnanOptions;
 import com.dat3m.dartagnan.wmm.Wmm;
 import com.dat3m.dartagnan.wmm.axiom.Axiom;
 import com.dat3m.dartagnan.wmm.utils.Arch;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
-import com.microsoft.z3.Solver;
-import com.microsoft.z3.Status;
 import com.microsoft.z3.enumerations.Z3_ast_print_mode;
+import org.apache.commons.cli.Option;
 
 public class Dartagnan {
 
@@ -95,10 +95,10 @@ public class Dartagnan {
         ctx.close();
     }
 
-    public static Result testProgram(Solver solver, Context ctx, Program program, Wmm wmm, Arch target, Settings settings) {
+    public static <Molel> Result testProgram(Solver solver, Context ctx, Program program, Wmm wmm, Arch target, Settings settings){
 
         Printer p = new Printer();
-        System.out.print(p.print(program));
+        //System.out.print(p.print(program));
 
     	program.unroll(settings.getBound(), 0);
         program.compile(target, 0);
@@ -131,6 +131,16 @@ public class Dartagnan {
 
         Result res;
         if(solver.check() == Status.SATISFIABLE) {
+            int position = -1;
+            Model m = solver.getModel();
+            HashMap<Integer, Event> executed_event_position = new HashMap<>();
+
+            //Here to call the witness class and transport the model to witness and modify all the things there
+            //here just using the event which are memory events and which are executed!
+
+            new Witness(m, program, ctx).write();
+
+
 			solver.add(encodeNoBoundEventExec);
 			res = solver.check() == Status.SATISFIABLE ? FAIL : BFAIL;	
 		} else {

@@ -43,7 +43,7 @@ public class EndAtomic extends Event {
 
     @Override
     public String toString() {
-    	return "end_atomic()";
+    	return "end_atomic()" + cline;
     }
     
     @Override

@@ -15,7 +15,7 @@ public class BeginAtomic extends Event {
 
     @Override
     public String toString() {
-    	return "begin_atomic()";
+    	return "begin_atomic()" + cline;
     }
 
     // Unrolling
