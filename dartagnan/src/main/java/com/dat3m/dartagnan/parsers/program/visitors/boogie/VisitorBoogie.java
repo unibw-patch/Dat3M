@@ -100,8 +100,6 @@ import com.dat3m.dartagnan.program.event.While;
 import com.dat3m.dartagnan.program.memory.Address;
 import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.utils.EType;
-import com.dat3m.dartagnan.program.svcomp.event.BeginAtomic;
-import com.dat3m.dartagnan.program.svcomp.event.EndAtomic;
 
 public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVisitor<Object> {
 
@@ -136,8 +134,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 	
 	protected int assertionIndex = 0;
 	
-	protected BeginAtomic currentBeginAtomic = null;
-	private Call_cmdContext atomicMode = null;
+	protected boolean atomicMode = false;
 	 
 	private List<String> smackDummyVariables = Arrays.asList("$GLOBALS_BOTTOM", "$EXTERNS_BOTTOM", "$MALLOC_TOP", "__SMACK_code", "__SMACK_decls", "__SMACK_top_decl", "$1024.ref", ".str.1", "env_value_str", ".str.1.3", ".str.19", "errno_global", "$CurrAddr");
 
@@ -399,10 +396,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 			return null;
 		}
 		if(name.contains("__VERIFIER_atomic_")) {
-			atomicMode = ctx;
-			currentBeginAtomic = new BeginAtomic();
-			programBuilder.addChild(threadCount, currentBeginAtomic);	
-			// No return, the body still needs to be parsed.
+			SvcompProcedures.__VERIFIER_atomic(this, true);
 		}
 		// TODO: double check this 
 		// Some procedures might have an empty implementation.
@@ -422,13 +416,8 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 		}
 		programBuilder.addChild(threadCount, new FunCall(name));	
 		visitProc_decl(procedures.get(name), false, callingValues);
-		if(ctx.equals(atomicMode)) {
-			if(currentBeginAtomic == null) {
-	            throw new ParsingException("__VERIFIER_atomic_end() does not have a matching __VERIFIER_atomic_begin()");
-			}
-			programBuilder.addChild(threadCount, new EndAtomic(currentBeginAtomic));	
-			currentBeginAtomic = null;
-			atomicMode = null;
+		if(atomicMode) {
+			SvcompProcedures.__VERIFIER_atomic(this, false);
 		}
 		programBuilder.addChild(threadCount, new FunRet(name));
 		if(name.equals("$initialize")) {

@@ -90,11 +90,11 @@ public class PthreadsProcedures {
 			return;			
 		}
 		if(name.contains("pthread_mutex_lock")) {
-			mutexLock(visitor, ctx);
+			mutex(visitor, ctx, true);
 			return;
 		}
 		if(name.contains("pthread_mutex_unlock")) {
-			mutexUnlock(visitor, ctx);
+			mutex(visitor, ctx, false);
 			return;
 		}
 		if(name.contains("pthread_setspecific")) {
@@ -140,31 +140,15 @@ public class PthreadsProcedures {
 		}
 	}
 	
-	private static void mutexLock(VisitorBoogie visitor, Call_cmdContext ctx) {
+	private static void mutex(VisitorBoogie visitor, Call_cmdContext ctx, boolean lock) {
         Register register = visitor.programBuilder.getOrCreateRegister(visitor.threadCount, null, -1);
 		IExpr lockAddress = (IExpr)ctx.call_params().exprs().accept(visitor);
        	Label label = visitor.programBuilder.getOrCreateLabel("END_OF_T" + visitor.threadCount);
 		if(lockAddress != null) {
 	        LinkedList<Event> events = new LinkedList<>();
 	        events.add(new Load(register, lockAddress, null));
-	        events.add(new CondJump(new Atom(register, NEQ, new IConst(0, -1)),label));
-	        events.add(new Store(lockAddress, new IConst(1, -1), null));
-	        for(Event e : events) {
-	        	e.addFilters(EType.LOCK, EType.RMW);
-	        	visitor.programBuilder.addChild(visitor.threadCount, e);
-	        }
-		}
-	}
-	
-	private static void mutexUnlock(VisitorBoogie visitor, Call_cmdContext ctx) {
-        Register register = visitor.programBuilder.getOrCreateRegister(visitor.threadCount, null, -1);
-		IExpr lockAddress = (IExpr)ctx.call_params().exprs().accept(visitor);
-       	Label label = visitor.programBuilder.getOrCreateLabel("END_OF_T" + visitor.threadCount);
-		if(lockAddress != null) {
-			LinkedList<Event> events = new LinkedList<>();
-	        events.add(new Load(register, lockAddress, null));
-	        events.add(new CondJump(new Atom(register, NEQ, new IConst(1, -1)),label));
-	        events.add(new Store(lockAddress, new IConst(0, -1), null));
+	        events.add(new CondJump(new Atom(register, NEQ, new IConst(lock ? 0 : 1, -1)),label));
+	        events.add(new Store(lockAddress, new IConst(lock ? 1 : 0, -1), null));
 	        for(Event e : events) {
 	        	e.addFilters(EType.LOCK, EType.RMW);
 	        	visitor.programBuilder.addChild(visitor.threadCount, e);
