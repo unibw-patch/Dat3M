@@ -123,7 +123,6 @@ public class SvcompProcedures {
         	e.addFilters(EType.LOCK, EType.RMW);
         	visitor.programBuilder.addChild(visitor.threadCount, e);
         }
-        visitor.atomicMode = begin;
 	}
 
 	private static void __VERIFIER_nondet(VisitorBoogie visitor, Call_cmdContext ctx, String name) {

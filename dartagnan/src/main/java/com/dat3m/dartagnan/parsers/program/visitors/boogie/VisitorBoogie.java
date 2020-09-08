@@ -134,7 +134,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 	
 	protected int assertionIndex = 0;
 	
-	protected boolean atomicMode = false;
+	protected Call_cmdContext atomicMode = null;
 	 
 	private List<String> smackDummyVariables = Arrays.asList("$GLOBALS_BOTTOM", "$EXTERNS_BOTTOM", "$MALLOC_TOP", "__SMACK_code", "__SMACK_decls", "__SMACK_top_decl", "$1024.ref", ".str.1", "env_value_str", ".str.1.3", ".str.19", "errno_global", "$CurrAddr");
 
@@ -396,6 +396,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 			return null;
 		}
 		if(name.contains("__VERIFIER_atomic_")) {
+			atomicMode = ctx;
 			SvcompProcedures.__VERIFIER_atomic(this, true);
 		}
 		// TODO: double check this 
@@ -416,8 +417,9 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 		}
 		programBuilder.addChild(threadCount, new FunCall(name));	
 		visitProc_decl(procedures.get(name), false, callingValues);
-		if(atomicMode) {
+		if(ctx.equals(atomicMode)) {
 			SvcompProcedures.__VERIFIER_atomic(this, false);
+			atomicMode = null;
 		}
 		programBuilder.addChild(threadCount, new FunRet(name));
 		if(name.equals("$initialize")) {
