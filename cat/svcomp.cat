@@ -11,4 +11,4 @@ let hb = po | com
 acyclic hb as sc
 
 (* Atomicity *)
-empty rmw & ( (com & ext) ; (po | com)* ; (com & ext) )
+empty rmw & (fre;coe)
