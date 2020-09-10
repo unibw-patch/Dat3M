@@ -47,7 +47,7 @@ public class Witness {
                 executed_event_position.put(e, position);
             }
         }
-        System.out.println(executed_event_position);
+        //System.out.println(executed_event_position);
 
         List<Map.Entry<Event, Integer>> list = new ArrayList<Map.Entry<Event, Integer>>(executed_event_position.entrySet());
 
@@ -68,7 +68,7 @@ public class Witness {
             fw.write("    <data key=\"specification\">CHECK( init(main()), LTL(G ! call(__VERIFIER_error())) )</data>\n");
             fw.write("    <data key=\"programfile\">" + "testtemp" + "</data>\n");
             fw.write("    <data key=\"architecture\">32bit</data>\n");
-            fw.write("    <data key=\"programhash\">" + "checksum()" + "</data>\n");
+            //fw.write("    <data key=\"programhash\">" + "checksum()" + "</data>\n");
             fw.write("    <data key=\"sourcecodelang\">C</data>\n");
             fw.write("    <node id=\"N0\"> <data key=\"entry\">true</data> </node>\n");
             fw.write("    <edge source=\"N0\" target=\"N1\"> <data key=\"createThread\">0</data> <data key=\"enterFunction\">main</data> </edge>\n");
@@ -79,6 +79,9 @@ public class Witness {
             for (Map.Entry<Event, Integer> mapping : list){
                 Event e = mapping.getKey();
                 cLine = e.getCline();
+
+                System.out.println(e.toString() + " the cline is " + e.getCline() + " the position is " + mapping.getValue());
+
                 fw.write("    <node id=\"N" + (time) + "\"> </node>\n");
                 fw.write("    <edge source=\"N" + time + "\" target=\"N" + (time+1) + "\"> <data key=\"" + "startline" + "\">" +  cLine  + "</data> </edge>\n");
                 time++;
