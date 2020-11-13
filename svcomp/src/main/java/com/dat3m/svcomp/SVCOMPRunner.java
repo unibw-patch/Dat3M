@@ -12,7 +12,6 @@ import com.dat3m.dartagnan.parsers.program.ProgramParser;
 import com.dat3m.dartagnan.program.Program;
 import com.dat3m.svcomp.options.SVCOMPOptions;
 import com.dat3m.svcomp.utils.SVCOMPSanitizer;
-import com.dat3m.svcomp.utils.SVCOMPWitness;
 
 public class SVCOMPRunner {
 

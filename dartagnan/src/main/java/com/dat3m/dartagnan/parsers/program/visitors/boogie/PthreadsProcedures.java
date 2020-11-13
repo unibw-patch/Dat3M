@@ -28,6 +28,9 @@ import com.dat3m.dartagnan.program.memory.Location;
 import com.dat3m.dartagnan.program.utils.EType;
 
 public class PthreadsProcedures {
+
+	private static int cline = -1;
+	private static Event child;
 	
 	public static List<String> PTHREADPROCEDURES = Arrays.asList( 
 			"pthread_create", 
@@ -106,6 +109,8 @@ public class PthreadsProcedures {
 	private static void pthread_create(VisitorBoogie visitor, Call_cmdContext ctx) {
 		String namePtr = ctx.call_params().exprs().expr().get(0).getText();
 		// This names are global so we don't use currentScope.getID(), but per thread.
+
+
 		Register threadPtr = visitor.programBuilder.getOrCreateRegister(visitor.threadCount, namePtr, -1);
 		String threadName = ctx.call_params().exprs().expr().get(2).getText();
 		ExprInterface callingValue = (ExprInterface)ctx.call_params().exprs().expr().get(3).accept(visitor);
@@ -113,7 +118,12 @@ public class PthreadsProcedures {
 		visitor.mainCallingValues.add(callingValue);
 		visitor.pool.add(threadPtr, threadName);
 		Location loc = visitor.programBuilder.getOrCreateLocation(threadPtr + "_active", -1);
-		visitor.programBuilder.addChild(visitor.threadCount, new AtomicStore(loc.getAddress(), new IConst(1, -1), SC));
+
+		//To add the cline for this pthread Event.
+		child = new AtomicStore(loc.getAddress(), new IConst(1, -1), SC);
+		child.setCline(visitor.cLine);
+		visitor.programBuilder.addChild(visitor.threadCount, child);
+		//visitor.programBuilder.addChild(visitor.threadCount, new AtomicStore(loc.getAddress(), new IConst(1, -1), SC));
 	}
 	
 	private static void pthread_join(VisitorBoogie visitor, Call_cmdContext ctx) {		
@@ -170,5 +180,16 @@ public class PthreadsProcedures {
 	        	visitor.programBuilder.addChild(visitor.threadCount, e);
 	        }
 		}
+	}
+
+	public static int selectCline (String ctx) {
+		System.out.println(ctx.toString());
+
+		if(ctx.contains("smack")) {
+			return -1;
+		}
+
+		String tmp = ctx.substring(ctx.indexOf(",")+1, ctx.lastIndexOf(","));
+		return Integer.parseInt(tmp);
 	}
 }

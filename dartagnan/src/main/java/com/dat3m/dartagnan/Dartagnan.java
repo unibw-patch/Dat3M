@@ -30,13 +30,12 @@ import com.dat3m.dartagnan.wmm.Wmm;
 import com.dat3m.dartagnan.wmm.axiom.Axiom;
 import com.dat3m.dartagnan.wmm.utils.Arch;
 import com.microsoft.z3.enumerations.Z3_ast_print_mode;
-import org.apache.commons.cli.Option;
 
 public class Dartagnan {
 
     public static void main(String[] args) throws IOException {
-
         DartagnanOptions options = new DartagnanOptions();
+
         try {
             options.parse(args);
         }
@@ -45,6 +44,7 @@ public class Dartagnan {
                 System.out.println(e.getMessage());
             }
             new HelpFormatter().printHelp("DARTAGNAN", options);
+
             System.exit(1);
             return;
         }
@@ -73,7 +73,27 @@ public class Dartagnan {
         Context ctx = new Context();
         Solver s = ctx.mkSolver();
 
+        //String programname = options.getProgramName();
+
         Result result = cegar != null ? runCegar(s, ctx, p, mcm, target, settings, cegar) : testProgram(s, ctx, p, mcm, target, settings);
+
+        if(result.equals(FAIL)) {
+            //int position = -1;
+            Model m = s.getModel();
+
+            //Here to call the witness class and transport the model to witness and modify all the things there
+            //here just using the event which are memory events and which are executed!
+
+            //System.out.println(p.getEvents());
+            /*for(Event e: p.getEvents()) {
+                System.out.println(e);
+            }*/
+
+            if(options.hasOption("w")) {
+                new Witness(m, p, ctx, options).write();
+            }
+
+        }
 
         if(options.getProgramFilePath().endsWith(".litmus")) {
             System.out.println("Settings: " + options.getSettings());
@@ -91,14 +111,13 @@ public class Dartagnan {
             drawGraph(new Graph(s.getModel(), ctx, p, settings.getGraphRelations()), options.getGraphFilePath());
             System.out.println("Execution graph is written to " + options.getGraphFilePath());
         }
-
         ctx.close();
     }
 
-    public static <Molel> Result testProgram(Solver solver, Context ctx, Program program, Wmm wmm, Arch target, Settings settings){
+    public static Result testProgram(Solver solver, Context ctx, Program program, Wmm wmm, Arch target, Settings settings){
 
         Printer p = new Printer();
-        //System.out.print(p.print(program));
+        System.out.print(p.print(program));
 
     	program.unroll(settings.getBound(), 0);
         program.compile(target, 0);
@@ -131,18 +150,8 @@ public class Dartagnan {
 
         Result res;
         if(solver.check() == Status.SATISFIABLE) {
-            int position = -1;
-            Model m = solver.getModel();
-            HashMap<Integer, Event> executed_event_position = new HashMap<>();
-
-            //Here to call the witness class and transport the model to witness and modify all the things there
-            //here just using the event which are memory events and which are executed!
-
-            new Witness(m, program, ctx).write();
-
-
 			solver.add(encodeNoBoundEventExec);
-			res = solver.check() == Status.SATISFIABLE ? FAIL : BFAIL;	
+			res = solver.check() == Status.SATISFIABLE ? FAIL : BFAIL;
 		} else {
 			solver.pop();
 			solver.add(ctx.mkNot(encodeNoBoundEventExec));
@@ -152,6 +161,21 @@ public class Dartagnan {
 		if(program.getAss().getInvert()) {
 			res = res.invert();
 		}
+
+		/*if(res.equals(FAIL)) {
+            //int position = -1;
+            Model m = solver.getModel();
+            //HashMap<Integer, Event> executed_event_position = new HashMap<>();
+
+            //Here to call the witness class and transport the model to witness and modify all the things there
+            //here just using the event which are memory events and which are executed!
+
+            if(options.getProgramName() != "NO") {
+                new Witness(m, program, ctx, options).write();
+            }
+
+        }*/
+
 		return res;
     }
     

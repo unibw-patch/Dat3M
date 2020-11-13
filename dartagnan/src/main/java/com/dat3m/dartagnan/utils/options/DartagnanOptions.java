@@ -11,6 +11,8 @@ public class DartagnanOptions extends BaseOptions {
 
     protected Set<String> supportedFormats = ImmutableSet.copyOf(Arrays.asList("litmus", "bpl"));
     protected Integer cegar;
+    protected String programName;
+
 	
     public DartagnanOptions(){
         super();
@@ -18,6 +20,10 @@ public class DartagnanOptions extends BaseOptions {
                 "Path to the CAT file");
         catOption.setRequired(true);
         addOption(catOption);
+
+        addOption(new Option("w", "witness", true,
+                "Creates a violation witness with class Dartagnan"));
+
 
         addOption(new Option("cegar", true,
                 "Use CEGAR"));
@@ -32,7 +38,14 @@ public class DartagnanOptions extends BaseOptions {
         if(cmd.hasOption("cegar")) {
             cegar = Integer.parseInt(cmd.getOptionValue("cegar")) - 1;        	
         }
+
+        if (cmd.hasOption("w")) {
+            programName = cmd.getOptionValue("w");
+        }
+
     }
+
+    public String getProgramName() { return programName;}
     
     public Integer getCegar(){
         return cegar;
