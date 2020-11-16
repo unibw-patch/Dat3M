@@ -5,6 +5,9 @@ import static com.dat3m.dartagnan.utils.Result.PASS;
 import static com.dat3m.dartagnan.utils.Result.UNKNOWN;
 import static com.microsoft.z3.Status.SATISFIABLE;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
 import com.dat3m.dartagnan.asserts.AssertTrue;
 import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.utils.Result;
@@ -99,6 +102,16 @@ public class Base {
         	solver.pop();
 			solver.add(ctx.mkNot(program.encodeNoBoundEventExec(ctx)));
         	res = solver.check() == SATISFIABLE ? UNKNOWN : PASS;
+        }
+
+        try {
+        	String expected = res.equals(FAIL) ? "sat" : res.equals(PASS) ? "unsat" : "unknown";
+        	String logic = "ALL";
+            BufferedWriter writer = new BufferedWriter(new FileWriter("./output/smt2/" + program.getName() + ".smt2"));
+            writer.write(ctx.benchmarkToSMTString(program.getName(), logic, expected, "", solver.getAssertions(), ctx.mkTrue()));
+            writer.close();
+        } catch (Exception e) {
+        	System.out.println(e.getMessage());
         }
 
         return program.getAss().getInvert() ? res.invert() : res;
