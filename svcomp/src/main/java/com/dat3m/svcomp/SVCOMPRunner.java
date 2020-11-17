@@ -82,7 +82,6 @@ public class SVCOMPRunner {
 				}
 				while(read.ready()) {
 					output = read.readLine();
-					System.out.println(output);
 				}
 				if(proc.exitValue() == 1) {
 					BufferedReader error = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
