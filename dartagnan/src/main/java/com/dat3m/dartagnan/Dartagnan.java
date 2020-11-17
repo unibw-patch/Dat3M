@@ -16,6 +16,7 @@ import com.dat3m.dartagnan.asserts.AbstractAssert;
 import com.dat3m.dartagnan.parsers.cat.ParserCat;
 import com.dat3m.dartagnan.parsers.program.ProgramParser;
 import com.dat3m.dartagnan.program.Program;
+import com.dat3m.dartagnan.solver.Backend;
 import com.dat3m.dartagnan.utils.Graph;
 import com.dat3m.dartagnan.utils.Result;
 import com.dat3m.dartagnan.utils.Settings;
@@ -57,10 +58,12 @@ public class Dartagnan {
         }
         
         Settings settings = options.getSettings();
+        Backend smtSolver = options.getSolver();
+
         Context ctx = new Context();
         Solver s = ctx.mkSolver();
 
-        Result result = selectAndRunAnalysis(options, mcm, p, target, settings, ctx, s);
+        Result result = selectAndRunAnalysis(options, mcm, p, target, settings, ctx, s, smtSolver);
  
         if(options.getProgramFilePath().endsWith(".litmus")) {
             System.out.println("Settings: " + options.getSettings());
@@ -86,7 +89,7 @@ public class Dartagnan {
         ctx.close();
     }
 
-	private static Result selectAndRunAnalysis(DartagnanOptions options, Wmm mcm, Program p, Arch target, Settings settings, Context ctx, Solver s) {
+	private static Result selectAndRunAnalysis(DartagnanOptions options, Wmm mcm, Program p, Arch target, Settings settings, Context ctx, Solver s, Backend smtSolver) {
 		switch(options.getAnalysis()) {
 			case RACES:
 				return checkForRaces(s, ctx, p, mcm, target, settings);	
@@ -94,7 +97,7 @@ public class Dartagnan {
 				return Termination.runAnalysis(s, ctx, p, mcm, target, settings);
 			case REACHABILITY:
 				return options.useISolver() ? 
-						runAnalysisIncrementalSolver(s, ctx, p, mcm, target, settings) : 
+						runAnalysisIncrementalSolver(s, ctx, p, mcm, target, settings, smtSolver) : 
 						runAnalysis(s, ctx, p, mcm, target, settings); 
 			default:
 				throw new RuntimeException("Unrecognized analysis");

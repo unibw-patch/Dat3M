@@ -60,6 +60,8 @@ public class SVCOMPRunner {
 	    	cmd.add(String.valueOf(bound));
 	    	cmd.add("-analysis");
 	    	cmd.add(options.getAnalysis().toString());
+	    	cmd.add("-solver");
+	    	cmd.add(options.getSolver().toString());
 	    	if(options.useISolver()) {
 	    		cmd.add("-incrementalSolver");
 	    	}
@@ -80,6 +82,7 @@ public class SVCOMPRunner {
 				}
 				while(read.ready()) {
 					output = read.readLine();
+					System.out.println(output);
 				}
 				if(proc.exitValue() == 1) {
 					BufferedReader error = new BufferedReader(new InputStreamReader(proc.getErrorStream()));

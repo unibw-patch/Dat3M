@@ -1,15 +1,21 @@
 package com.dat3m.dartagnan.analysis;
 
+import static com.dat3m.dartagnan.solver.Backend.CVC4;
+import static com.dat3m.dartagnan.solver.Backend.Z3;
 import static com.dat3m.dartagnan.utils.Result.FAIL;
 import static com.dat3m.dartagnan.utils.Result.PASS;
 import static com.dat3m.dartagnan.utils.Result.UNKNOWN;
 import static com.microsoft.z3.Status.SATISFIABLE;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import com.dat3m.dartagnan.asserts.AssertTrue;
 import com.dat3m.dartagnan.program.Program;
+import com.dat3m.dartagnan.solver.Backend;
 import com.dat3m.dartagnan.utils.Result;
 import com.dat3m.dartagnan.utils.Settings;
 import com.dat3m.dartagnan.wmm.Wmm;
@@ -75,6 +81,10 @@ public class Base {
     }
 	
     public static Result runAnalysisIncrementalSolver(Solver solver, Context ctx, Program program, Wmm wmm, Arch target, Settings settings) {
+    	return runAnalysisIncrementalSolver(solver, ctx, program, wmm, target, settings, Z3);
+    }
+    
+    public static Result runAnalysisIncrementalSolver(Solver solver, Context ctx, Program program, Wmm wmm, Arch target, Settings settings, Backend smtSolver) {
     	program.unroll(settings.getBound(), 0);
         program.compile(target, 0);
         // AssertionInline depends on compiled events (copies)
@@ -94,7 +104,15 @@ public class Base {
             solver.add(program.getAssFilter().encode(ctx));
         }
 
-        Result res = UNKNOWN;
+        if(smtSolver.equals(CVC4)) {
+            try {
+            	return runCVC4(solver, ctx, program);
+            } catch (Exception e) {
+            	// Nothing to be done
+            }        	
+        }
+
+        Result res = UNKNOWN;        
 		if(solver.check() == SATISFIABLE) {
         	solver.add(program.encodeNoBoundEventExec(ctx));
 			res = solver.check() == SATISFIABLE ? FAIL : UNKNOWN;
@@ -103,17 +121,53 @@ public class Base {
 			solver.add(ctx.mkNot(program.encodeNoBoundEventExec(ctx)));
         	res = solver.check() == SATISFIABLE ? UNKNOWN : PASS;
         }
-
-        try {
-        	String expected = res.equals(FAIL) ? "sat" : res.equals(PASS) ? "unsat" : "unknown";
-        	String logic = "ALL";
-            BufferedWriter writer = new BufferedWriter(new FileWriter("./output/smt2/" + program.getName() + ".smt2"));
-            writer.write(ctx.benchmarkToSMTString(program.getName(), logic, expected, "", solver.getAssertions(), ctx.mkTrue()));
+		return program.getAss().getInvert() ? res.invert() : res;
+    }
+    
+    private static Result runCVC4(Solver solver, Context ctx, Program program) throws Exception {
+        BufferedWriter writer = new BufferedWriter(new FileWriter("./output/smt2/" + program.getName() + ".smt2"));
+        writer.write(ctx.benchmarkToSMTString(program.getName(), "ALL", "unknown", "", solver.getAssertions(), ctx.mkTrue()));
+        writer.close();
+        
+        ArrayList<String> cmd = new ArrayList<String>();
+        cmd.add("cvc4");
+        cmd.add("./output/smt2/" + program.getName() + ".smt2");
+        ProcessBuilder processBuilder = new ProcessBuilder(cmd);
+    	Process proc = processBuilder.start();
+		BufferedReader read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+		proc.waitFor();
+		Result res = UNKNOWN;
+		String output = "unknown";
+		while(read.ready()) {
+			output = read.readLine();
+		}
+		if(output.equals("sat")) {
+            writer = new BufferedWriter(new FileWriter("./output/smt2/" + program.getName() + "final.smt2"));
+            writer.write(ctx.benchmarkToSMTString(program.getName(), "ALL", "unknown", "", solver.getAssertions(), program.encodeNoBoundEventExec(ctx)));
             writer.close();
-        } catch (Exception e) {
-        	System.out.println(e.getMessage());
+            processBuilder = new ProcessBuilder(cmd);
+        	proc = processBuilder.start();
+    		read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+    		proc.waitFor();
+    		while(read.ready()) {
+    			output = read.readLine();
+    		}
+			res = output.equals("sat") ? FAIL : UNKNOWN;
+        } else {
+        	solver.pop();
+            writer = new BufferedWriter(new FileWriter("./output/smt2/" + program.getName() + "final.smt2"));
+            writer.write(ctx.benchmarkToSMTString(program.getName(), "ALL", "unknown", "", solver.getAssertions(), ctx.mkNot(program.encodeNoBoundEventExec(ctx))));
+            writer.close();
+            processBuilder = new ProcessBuilder(cmd);
+        	proc = processBuilder.start();
+    		read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+    		proc.waitFor();
+    		while(read.ready()) {
+    			output = read.readLine();
+    		}
+    		res = output.equals("sat") ? UNKNOWN : PASS;
         }
+		return program.getAss().getInvert() ? res.invert() : res;
 
-        return program.getAss().getInvert() ? res.invert() : res;
     }
 }

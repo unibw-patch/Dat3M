@@ -4,6 +4,8 @@ import static com.dat3m.dartagnan.analysis.AnalysisTypes.RACES;
 import static com.dat3m.dartagnan.analysis.AnalysisTypes.REACHABILITY;
 import static com.dat3m.dartagnan.analysis.AnalysisTypes.TERMINATION;
 import static com.dat3m.dartagnan.analysis.AnalysisTypes.fromString;
+import static com.dat3m.dartagnan.solver.Backend.CVC4;
+import static com.dat3m.dartagnan.solver.Backend.Z3;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -11,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.cli.*;
 
 import com.dat3m.dartagnan.analysis.AnalysisTypes;
+import com.dat3m.dartagnan.solver.Backend;
 import com.google.common.collect.ImmutableSet;
 
 public class DartagnanOptions extends BaseOptions {
@@ -20,7 +23,9 @@ public class DartagnanOptions extends BaseOptions {
     protected boolean iSolver;
     protected String witness;
     private Set<AnalysisTypes> analyses = ImmutableSet.copyOf(Arrays.asList(REACHABILITY, RACES, TERMINATION));
-    private AnalysisTypes analysis = REACHABILITY; 
+    private AnalysisTypes analysis = REACHABILITY;
+    private Set<Backend> solvers = ImmutableSet.copyOf(Arrays.asList(Z3, CVC4));
+    private Backend solver = Z3;
 	
     public DartagnanOptions(){
         super();
@@ -37,7 +42,10 @@ public class DartagnanOptions extends BaseOptions {
 
         addOption(new Option("analysis", true,
         		"The analysis to be performed: reachability (default), data-race detection, termination"));
-        }
+
+        addOption(new Option("solver", true,
+        		"The backend SMT solver: z3 (default), cvc4"));
+    }
     
     public void parse(String[] args) throws ParseException, RuntimeException {
     	super.parse(args);
@@ -53,6 +61,13 @@ public class DartagnanOptions extends BaseOptions {
         	}
         	analysis = selectedAnalysis;
         }
+        if(cmd.hasOption("solver")) {
+        	Backend selectedSolver = Backend.fromString(cmd.getOptionValue("solver"));
+        	if(!solvers.contains(selectedSolver)) {
+        		throw new RuntimeException("Unrecognized solver");
+        	}
+        	solver = selectedSolver;
+        }
         if(cmd.hasOption("witness")) {
         	witness = cmd.getOptionValue("witness");
         }
@@ -64,6 +79,10 @@ public class DartagnanOptions extends BaseOptions {
 
     public AnalysisTypes getAnalysis(){
 		return analysis;
+    }
+
+    public Backend getSolver(){
+		return solver;
     }
 
     public String createWitness(){

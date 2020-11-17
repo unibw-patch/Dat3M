@@ -4,6 +4,8 @@ import static com.dat3m.dartagnan.analysis.AnalysisTypes.RACES;
 import static com.dat3m.dartagnan.analysis.AnalysisTypes.REACHABILITY;
 import static com.dat3m.dartagnan.analysis.AnalysisTypes.TERMINATION;
 import static com.dat3m.dartagnan.analysis.AnalysisTypes.fromString;
+import static com.dat3m.dartagnan.solver.Backend.CVC4;
+import static com.dat3m.dartagnan.solver.Backend.Z3;
 import static java.util.stream.IntStream.rangeClosed;
 
 import java.util.Arrays;
@@ -17,6 +19,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 
 import com.dat3m.dartagnan.analysis.AnalysisTypes;
+import com.dat3m.dartagnan.solver.Backend;
 import com.dat3m.dartagnan.utils.options.BaseOptions;
 import com.google.common.collect.ImmutableSet;
 
@@ -31,6 +34,8 @@ public class SVCOMPOptions extends BaseOptions {
     protected boolean iSolver;
     private Set<AnalysisTypes> analyses = ImmutableSet.copyOf(Arrays.asList(REACHABILITY, RACES, TERMINATION));
     private AnalysisTypes analysis = REACHABILITY; 
+    private Set<Backend> solvers = ImmutableSet.copyOf(Arrays.asList(Z3, CVC4));
+    private Backend solver = Z3; 
     
     public SVCOMPOptions(){
         super();
@@ -53,6 +58,9 @@ public class SVCOMPOptions extends BaseOptions {
         
         addOption(new Option("bp", "bit-precise", false,
                 "Use bit precise encoding"));
+        
+        addOption(new Option("solver", true,
+        		"The backend SMT solver: z3 (default), cvc4"));
 }
     
     public void parse(String[] args) throws ParseException, RuntimeException {
@@ -75,6 +83,13 @@ public class SVCOMPOptions extends BaseOptions {
         	}
         	analysis = selectedAnalysis;
         }
+        if(cmd.hasOption("solver")) {
+        	Backend selectedSolver = Backend.fromString(cmd.getOptionValue("solver"));
+        	if(!solvers.contains(selectedSolver)) {
+        		throw new RuntimeException("Unrecognized solver");
+        	}
+        	solver = selectedSolver;
+        }
     }
 
     public String getOptimization(){
@@ -95,6 +110,10 @@ public class SVCOMPOptions extends BaseOptions {
 
     public AnalysisTypes getAnalysis(){
 		return analysis;
+    }
+
+    public Backend getSolver(){
+		return solver;
     }
 
     public List<Integer> getBounds() {
