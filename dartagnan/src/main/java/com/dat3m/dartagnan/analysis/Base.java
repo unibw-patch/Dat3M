@@ -141,13 +141,18 @@ public class Base {
 		while(read.ready()) {
 			output = read.readLine();
 		}
-		if(!output.contains("unsat")) {
+		if(!output.contains("sat")) {
 			throw new RuntimeException("Problem with cvc4");
 		}
 		if(output.equals("sat")) {
-            writer = new BufferedWriter(new FileWriter("./output/smt2/" + program.getName() + "final.smt2"));
+            writer = new BufferedWriter(new FileWriter("./output/smt2/" + program.getName() + ".final.smt2"));
             writer.write(ctx.benchmarkToSMTString(program.getName(), "ALL", "unknown", "", solver.getAssertions(), program.encodeNoBoundEventExec(ctx)));
             writer.close();
+            
+            cmd = new ArrayList<String>();
+            cmd.add("cvc4");
+            cmd.add("./output/smt2/" + program.getName() + ".final.smt2");
+
             processBuilder = new ProcessBuilder(cmd);
         	proc = processBuilder.start();
     		read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -155,15 +160,20 @@ public class Base {
     		while(read.ready()) {
     			output = read.readLine();
     		}
-    		if(!output.contains("unsat")) {
+    		if(!output.contains("sat")) {
     			throw new RuntimeException("Problem with cvc4");
     		}
 			res = output.equals("sat") ? FAIL : UNKNOWN;
         } else {
         	solver.pop();
-            writer = new BufferedWriter(new FileWriter("./output/smt2/" + program.getName() + "final.smt2"));
+            writer = new BufferedWriter(new FileWriter("./output/smt2/" + program.getName() + ".final.smt2"));
             writer.write(ctx.benchmarkToSMTString(program.getName(), "ALL", "unknown", "", solver.getAssertions(), ctx.mkNot(program.encodeNoBoundEventExec(ctx))));
             writer.close();
+            
+            cmd = new ArrayList<String>();
+            cmd.add("cvc4");
+            cmd.add("./output/smt2/" + program.getName() + ".final.smt2");
+            
             processBuilder = new ProcessBuilder(cmd);
         	proc = processBuilder.start();
     		read = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -171,7 +181,7 @@ public class Base {
     		while(read.ready()) {
     			output = read.readLine();
     		}
-    		if(!output.contains("unsat")) {
+    		if(!output.contains("sat")) {
     			throw new RuntimeException("Problem with cvc4");
     		}
     		res = output.equals("sat") ? UNKNOWN : PASS;
