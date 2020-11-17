@@ -141,6 +141,9 @@ public class Base {
 		while(read.ready()) {
 			output = read.readLine();
 		}
+		if(!output.contains("unsat")) {
+			throw new RuntimeException("Problem with cvc4");
+		}
 		if(output.equals("sat")) {
             writer = new BufferedWriter(new FileWriter("./output/smt2/" + program.getName() + "final.smt2"));
             writer.write(ctx.benchmarkToSMTString(program.getName(), "ALL", "unknown", "", solver.getAssertions(), program.encodeNoBoundEventExec(ctx)));
@@ -151,6 +154,9 @@ public class Base {
     		proc.waitFor();
     		while(read.ready()) {
     			output = read.readLine();
+    		}
+    		if(!output.contains("unsat")) {
+    			throw new RuntimeException("Problem with cvc4");
     		}
 			res = output.equals("sat") ? FAIL : UNKNOWN;
         } else {
@@ -164,6 +170,9 @@ public class Base {
     		proc.waitFor();
     		while(read.ready()) {
     			output = read.readLine();
+    		}
+    		if(!output.contains("unsat")) {
+    			throw new RuntimeException("Problem with cvc4");
     		}
     		res = output.equals("sat") ? UNKNOWN : PASS;
         }
