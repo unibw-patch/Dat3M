@@ -3,6 +3,7 @@ package com.dat3m.dartagnan;
 import static com.dat3m.dartagnan.analysis.Base.runAnalysis;
 import static com.dat3m.dartagnan.analysis.Base.runAnalysisIncrementalSolver;
 import static com.dat3m.dartagnan.analysis.DataRaces.checkForRaces;
+import static com.dat3m.dartagnan.solver.Backend.Z3;
 import static com.dat3m.dartagnan.utils.Result.FAIL;
 import static com.microsoft.z3.enumerations.Z3_ast_print_mode.Z3_PRINT_SMTLIB_FULL;
 
@@ -76,11 +77,11 @@ public class Dartagnan {
         	System.out.println(result);
         }
 
-        if(options.createWitness() != null && result.equals(FAIL)) {
+        if(options.createWitness() != null && result.equals(FAIL) && smtSolver.equals(Z3)) {
         	new Witness(p, ctx, s.getModel(), options.createWitness()).write();
         }
         
-        if(settings.getDrawGraph() && canDrawGraph(p.getAss(), result.equals(FAIL))) {
+        if(settings.getDrawGraph() && canDrawGraph(p.getAss(), result.equals(FAIL))  && smtSolver.equals(Z3)) {
         	ctx.setPrintMode(Z3_PRINT_SMTLIB_FULL);
             drawGraph(new Graph(s.getModel(), ctx, p, settings.getGraphRelations()), options.getGraphFilePath());
             System.out.println("Execution graph is written to " + options.getGraphFilePath());
