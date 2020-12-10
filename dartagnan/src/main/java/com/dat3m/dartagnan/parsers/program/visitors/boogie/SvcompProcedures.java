@@ -12,12 +12,16 @@ import com.dat3m.dartagnan.expression.INonDetTypes;
 import com.dat3m.dartagnan.parsers.BoogieParser.Call_cmdContext;
 import com.dat3m.dartagnan.parsers.program.utils.ParsingException;
 import com.dat3m.dartagnan.program.Register;
+import com.dat3m.dartagnan.program.atomic.event.AtomicStore;
 import com.dat3m.dartagnan.program.event.Assume;
+import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.Label;
 import com.dat3m.dartagnan.program.event.Local;
 import com.dat3m.dartagnan.program.svcomp.event.BeginAtomic;
 import com.dat3m.dartagnan.program.svcomp.event.EndAtomic;
 import com.dat3m.dartagnan.program.utils.EType;
+
+import static com.dat3m.dartagnan.program.atomic.utils.Mo.SC;
 
 public class SvcompProcedures {
 
@@ -37,6 +41,7 @@ public class SvcompProcedures {
 			"__VERIFIER_nondet_ulong",
 			"__VERIFIER_nondet_char",
 			"__VERIFIER_nondet_uchar");
+	private static Event child;
 
 	public static void handleSvcompFunction(VisitorBoogie visitor, Call_cmdContext ctx) {
 		String name = ctx.call_params().Define() == null ? ctx.call_params().Ident(0).getText() : ctx.call_params().Ident(1).getText();
@@ -142,7 +147,11 @@ public class SvcompProcedures {
 		String registerName = ctx.call_params().Ident(0).getText();
 		Register register = visitor.programBuilder.getRegister(visitor.threadCount, visitor.currentScope.getID() + ":" + registerName);
 	    if(register != null){
-	    	visitor.programBuilder.addChild(visitor.threadCount, new Local(register, new INonDet(type, register.getPrecision())));
+			child = new Local(register, new INonDet(type, register.getPrecision()));
+			child.setCline(visitor.cLine);
+			visitor.programBuilder.addChild(visitor.threadCount, child);
+
+	    	//visitor.programBuilder.addChild(visitor.threadCount, new Local(register, new INonDet(type, register.getPrecision())));
 	    }
 	}
 

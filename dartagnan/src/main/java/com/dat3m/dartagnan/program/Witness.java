@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
+import com.dat3m.dartagnan.expression.BConst;
 import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.MemEvent;
 import com.dat3m.dartagnan.program.memory.Address;
@@ -36,7 +37,7 @@ public class Witness {
     public void write () {
         File newTextFile = new File("./output/" + option.getbplName() + ".graphml");
         FileWriter fw;
-        HashMap<Event, Integer> executed_event_position = new HashMap<Event, Integer>();
+        HashMap<Event, Integer> executed_event_position = new HashMap<>();
 
         int position;
         int count_threads = 0;
@@ -76,7 +77,7 @@ public class Witness {
         }
 
 
-        List<Map.Entry<Event, Integer>> list = new ArrayList<Map.Entry<Event, Integer>>(executed_event_position.entrySet());
+        List<Map.Entry<Event, Integer>> list = new ArrayList<>(executed_event_position.entrySet());
 
         /*for (Map.Entry<Event, Integer> mapping : list) {
             System.out.println(mapping.getKey().toString() + " " + mapping.getKey().getCline() + " " + mapping.getValue() + " " + mapping.getKey().getOId());
@@ -89,9 +90,10 @@ public class Witness {
             }
         });
 
+        //for selecting the lines which have the same cline.
         int cforrepeat = -1;
         int oidforrepeat = Integer.MAX_VALUE;
-        List<Map.Entry<Event, Integer>> secondlist = new ArrayList<Map.Entry<Event, Integer>>();
+        List<Map.Entry<Event, Integer>> secondlist = new ArrayList<>();
         for (Map.Entry<Event, Integer> mapping : list) {
             if (cforrepeat == mapping.getKey().getCline() && mapping.getKey().getOId() > oidforrepeat) {
                 cforrepeat = mapping.getKey().getCline();
@@ -104,16 +106,33 @@ public class Witness {
             oidforrepeat = mapping.getKey().getOId();
         }
 
+        cforrepeat =Integer.MIN_VALUE;
+        List<Map.Entry<Event, Integer>> delectrepeatlist = new ArrayList<>();
+        for (Map.Entry<Event, Integer> mapping : list) {
+            if (cforrepeat == mapping.getKey().getCline()) {
+                cforrepeat = mapping.getKey().getCline();
+                continue;
+            }
+            delectrepeatlist.add(mapping);
+            cforrepeat = mapping.getKey().getCline();
+        }
+
         for (Map.Entry<Event, Integer> mapping : list) {
             System.out.println(mapping.getKey().toString() + " " + mapping.getKey().getCline() + " " + mapping.getValue() + " " + mapping.getKey().getOId());
         }
 
         System.out.println(" ");
 
+        //print the selected events for unrolling
         for (Map.Entry<Event, Integer> mapping : secondlist) {
             System.out.println(mapping.getKey().toString() + " " + mapping.getKey().getCline() + " " + mapping.getValue() + " " + mapping.getKey().getOId());
         }
 
+        System.out.println(" ");
+
+        for (Map.Entry<Event, Integer> mapping : delectrepeatlist) {
+            System.out.println(mapping.getKey().toString() + " " + mapping.getKey().getCline() + " " + mapping.getValue() + " " + mapping.getKey().getOId());
+        }
 
 
         try {
@@ -136,19 +155,15 @@ public class Witness {
             int cLine = -1;
             //int avoid = cLine;
             int count = 0;
-            int oid =-1;
 
-            HashMap<Integer, Integer> cline_ = new HashMap<Integer, Integer>();
-            for (Map.Entry<Event, Integer> mapping : secondlist){
+            for (Map.Entry<Event, Integer> mapping : delectrepeatlist){
                 Event e = mapping.getKey();
                 cLine = e.getCline();
 
-                /*if((cLine == avoid && e.getOId() != oid)|| cLine == -1) {
-                    oid = e.getOId();
-                    //listforoid.add(mapping.getKey().getOId());
+                //to check if the event refers to a return!
+                if(e instanceof MemEvent && ((MemEvent)e).getMemValue() instanceof BConst && !((BConst)((MemEvent)e).getMemValue()).getValue()) {
                     continue;
-                    //check oid for all events
-                }*/
+                }
 
 
                 fw.write("    <node id=\"N" + (time) + "\"> </node>\n");
