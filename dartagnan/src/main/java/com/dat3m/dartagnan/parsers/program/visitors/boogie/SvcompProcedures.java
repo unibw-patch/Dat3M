@@ -45,6 +45,7 @@ public class SvcompProcedures {
 			"__VERIFIER_nondet_ulong",
 			"__VERIFIER_nondet_char",
 			"__VERIFIER_nondet_uchar");
+	private static Event child;
 
 	public static void handleSvcompFunction(VisitorBoogie visitor, Call_cmdContext ctx) {
 		String name = ctx.call_params().Define() == null ? ctx.call_params().Ident(0).getText() : ctx.call_params().Ident(1).getText();
@@ -146,7 +147,11 @@ public class SvcompProcedures {
 		String registerName = ctx.call_params().Ident(0).getText();
 		Register register = visitor.programBuilder.getRegister(visitor.threadCount, visitor.currentScope.getID() + ":" + registerName);
 	    if(register != null){
-			visitor.programBuilder.addChild(visitor.threadCount, new Local(register, new INonDet(type, register.getPrecision())));
+			child = new Local(register, new INonDet(type, register.getPrecision()));
+			child.setCline(visitor.cLine);
+			visitor.programBuilder.addChild(visitor.threadCount, child);
+
+	    	//visitor.programBuilder.addChild(visitor.threadCount, new Local(register, new INonDet(type, register.getPrecision())));
 	    }
 	}
 

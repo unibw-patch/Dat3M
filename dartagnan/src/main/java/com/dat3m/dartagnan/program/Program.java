@@ -120,6 +120,15 @@ public class Program {
 		return events;
 	}
 
+	public int getThreadId (Event e) {
+        for(Thread t : threads){
+            if(t.getCache().getEvents(FilterBasic.get(EType.ANY)).contains(e)) {
+                return t.getId();
+            }
+        }
+        return -1;
+    }
+
 	public void updateAssertion() {
 		if(ass != null) {
 			return;

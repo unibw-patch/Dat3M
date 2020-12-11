@@ -6,5 +6,7 @@ include "cos.cat"
 (* All communication relations *)
 let com = (rf | fr | co)
 
+let hb = po | com
+
 (* Sequential consistency *)
-acyclic po | com as sc
+acyclic hb as sc

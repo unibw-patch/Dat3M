@@ -6,9 +6,9 @@ import static com.dat3m.dartagnan.analysis.DataRaces.checkForRaces;
 import static com.dat3m.dartagnan.utils.Result.FAIL;
 import static com.microsoft.z3.enumerations.Z3_ast_print_mode.Z3_PRINT_SMTLIB_FULL;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import com.dat3m.dartagnan.program.Witness;
+import com.microsoft.z3.*;
 import org.apache.commons.cli.HelpFormatter;
 
 import com.dat3m.dartagnan.analysis.Termination;
@@ -22,14 +22,12 @@ import com.dat3m.dartagnan.utils.Settings;
 import com.dat3m.dartagnan.utils.options.DartagnanOptions;
 import com.dat3m.dartagnan.wmm.Wmm;
 import com.dat3m.dartagnan.wmm.utils.Arch;
-import com.microsoft.z3.Context;
-import com.microsoft.z3.Solver;
 
 public class Dartagnan {
 
     public static void main(String[] args) throws IOException {
-
         DartagnanOptions options = new DartagnanOptions();
+
         try {
             options.parse(args);
         }
@@ -38,6 +36,7 @@ public class Dartagnan {
                 System.out.println(e.getMessage());
             }
             new HelpFormatter().printHelp("DARTAGNAN", options);
+
             System.exit(1);
             return;
         }
@@ -59,8 +58,28 @@ public class Dartagnan {
         Context ctx = new Context();
         Solver s = ctx.mkSolver();
 
-        Result result = selectAndRunAnalysis(options, mcm, p, target, settings, ctx, s);
- 
+        //String programname = options.getProgramName();
+
+		Result result = selectAndRunAnalysis(options, mcm, p, target, settings, ctx, s);
+
+        if(result.equals(FAIL)) {
+            //int position = -1;
+            Model m = s.getModel();
+
+            //Here to call the witness class and transport the model to witness and modify all the things there
+            //here just using the event which are memory events and which are executed!
+
+            //System.out.println(p.getEvents());
+            /*for(Event e: p.getEvents()) {
+                System.out.println(e);
+            }*/
+
+            if(options.hasOption("w")) {
+                new Witness(m, p, ctx, options).write();
+            }
+
+        }
+
         if(options.getProgramFilePath().endsWith(".litmus")) {
             System.out.println("Settings: " + options.getSettings());
             if(p.getAssFilter() != null){
@@ -77,7 +96,6 @@ public class Dartagnan {
             drawGraph(new Graph(s.getModel(), ctx, p, settings.getGraphRelations()), options.getGraphFilePath());
             System.out.println("Execution graph is written to " + options.getGraphFilePath());
         }
-
         ctx.close();
     }
 

@@ -22,8 +22,11 @@ public abstract class BaseOptions extends Options {
         super();
         Option inputOption = new Option("i", "input", true,
                 "Path to the file with input program");
-        inputOption.setRequired(true);
+            inputOption.setRequired(true);
         addOption(inputOption);
+
+        // new option of w, only when cml contains "w", it will create a graph file automatically.
+        //addOption(new Option("w", "write", true, "only print if required!"));
 
         addOption(new Option("t", "target", true,
                 "Target architecture {none|arm|arm8|power|tso}"));
@@ -50,6 +53,9 @@ public abstract class BaseOptions extends Options {
         parseGraphFilePath(cmd);
 
         programFilePath = cmd.getOptionValue("input");
+
+        //parseGraphwrite(cmd, programFilePath);
+
         targetModelFilePath = cmd.getOptionValue("cat");
 
         if(cmd.hasOption("target")) {
@@ -77,6 +83,12 @@ public abstract class BaseOptions extends Options {
         return target;
     }
 
+    public String getbplName () {
+        return  programFilePath.substring(programFilePath.lastIndexOf('/'), programFilePath.lastIndexOf('.'));
+    }
+
+    //public String getProgramName() { return programName;}
+
     protected void parseSettings(CommandLine cmd){
         Mode mode = cmd.hasOption("mode") ? Mode.get(cmd.getOptionValue("mode")) : null;
         Alias alias = cmd.hasOption("alias") ? Alias.get(cmd.getOptionValue("alias")) : null;
@@ -102,4 +114,12 @@ public abstract class BaseOptions extends Options {
             }
         }
     }
+
+    /*protected void parseGraphwrite(CommandLine cmd, String programPath){
+        if(cmd.hasOption("w")){
+            programName = programPath.substring(programFilePath.lastIndexOf('/'), programPath.lastIndexOf('.'));
+        }
+        else programName = "NO";
+    }*/
+
 }

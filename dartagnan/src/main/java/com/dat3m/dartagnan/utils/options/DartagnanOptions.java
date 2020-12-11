@@ -19,7 +19,8 @@ public class DartagnanOptions extends BaseOptions {
     protected boolean iSolver;
     private Set<AnalysisTypes> analyses = ImmutableSet.copyOf(Arrays.asList(REACHABILITY, RACES, TERMINATION));
     private AnalysisTypes analysis = REACHABILITY; 
-	
+    protected String programName;
+
     public DartagnanOptions(){
         super();
         Option catOption = new Option("cat", true,
@@ -32,7 +33,14 @@ public class DartagnanOptions extends BaseOptions {
         
         addOption(new Option("analysis", true,
         		"The analysis to be performed: reachability (default), data-race detection, termination"));
-        }
+
+        addOption(new Option("w", "witness", true,
+                "Creates a violation witness with class Dartagnan"));
+
+
+        addOption(new Option("cegar", true,
+                "Use CEGAR"));
+    }
     
     public void parse(String[] args) throws ParseException, RuntimeException {
     	super.parse(args);
@@ -48,7 +56,14 @@ public class DartagnanOptions extends BaseOptions {
         	}
         	analysis = selectedAnalysis;
         }
+
+        if (cmd.hasOption("w")) {
+            programName = cmd.getOptionValue("w");
+        }
+
     }
+
+    public String getProgramName() { return programName;}
     
     public boolean useISolver(){
         return iSolver;
