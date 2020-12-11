@@ -19,7 +19,6 @@ public class SVCOMPOptions extends BaseOptions {
 
     protected Set<String> supportedFormats = ImmutableSet.copyOf(Arrays.asList("c", "i")); 
     protected String optimization = "O0";
-    protected boolean witness;
     protected boolean bp;
     protected boolean iSolver;
     private AnalysisTypes analysis; 
@@ -39,9 +38,6 @@ public class SVCOMPOptions extends BaseOptions {
         addOption(new Option("incrementalSolver", false,
         		"Use an incremental solver"));
 
-        addOption(new Option("w", "witness", false,
-                "Creates a machine readable witness"));
-        
         addOption(new Option("o", "optimization", true,
                 "Optimization flag for LLVM compiler"));
         
@@ -59,7 +55,6 @@ public class SVCOMPOptions extends BaseOptions {
         if(cmd.hasOption("optimization")) {
         	optimization = cmd.getOptionValue("optimization");
         }
-        witness = cmd.hasOption("witness");
         iSolver = cmd.hasOption("incrementalSolver");
         bp = cmd.hasOption("bit-precise");
         
@@ -85,10 +80,6 @@ public class SVCOMPOptions extends BaseOptions {
 
     public boolean useISolver(){
         return iSolver;
-    }
-
-    public boolean createWitness(){
-        return witness;
     }
 
     public boolean useBP(){

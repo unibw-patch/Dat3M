@@ -19,7 +19,6 @@ import com.dat3m.dartagnan.program.Program;
 import com.dat3m.dartagnan.utils.Graph;
 import com.dat3m.dartagnan.utils.Result;
 import com.dat3m.dartagnan.utils.Settings;
-import com.dat3m.dartagnan.utils.Witness;
 import com.dat3m.dartagnan.utils.options.DartagnanOptions;
 import com.dat3m.dartagnan.wmm.Wmm;
 import com.dat3m.dartagnan.wmm.utils.Arch;
@@ -73,10 +72,6 @@ public class Dartagnan {
         	System.out.println(result);
         }
 
-        if(options.createWitness() != null) {
-        	new Witness(p, options.createWitness()).write(ctx, s, result);
-        }
-        
         if(settings.getDrawGraph() && canDrawGraph(p.getAss(), result.equals(FAIL))) {
         	ctx.setPrintMode(Z3_PRINT_SMTLIB_FULL);
             drawGraph(new Graph(s.getModel(), ctx, p, settings.getGraphRelations()), options.getGraphFilePath());

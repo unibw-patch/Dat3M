@@ -17,7 +17,6 @@ public class DartagnanOptions extends BaseOptions {
 
     protected Set<String> supportedFormats = ImmutableSet.copyOf(Arrays.asList("litmus", "bpl"));
     protected boolean iSolver;
-    protected String witness;
     private Set<AnalysisTypes> analyses = ImmutableSet.copyOf(Arrays.asList(REACHABILITY, RACES, TERMINATION));
     private AnalysisTypes analysis = REACHABILITY; 
 	
@@ -31,9 +30,6 @@ public class DartagnanOptions extends BaseOptions {
         addOption(new Option("incrementalSolver", false,
         		"Use an incremental solver"));
         
-        addOption(new Option("w", "witness", true,
-                "Creates a machine readable witness. The argument is the original *.c file from which the Boogie code was generated."));
-
         addOption(new Option("analysis", true,
         		"The analysis to be performed: reachability (default), data-race detection, termination"));
         }
@@ -52,9 +48,6 @@ public class DartagnanOptions extends BaseOptions {
         	}
         	analysis = selectedAnalysis;
         }
-        if(cmd.hasOption("witness")) {
-        	witness = cmd.getOptionValue("witness");
-        }
     }
     
     public boolean useISolver(){
@@ -63,9 +56,5 @@ public class DartagnanOptions extends BaseOptions {
 
     public AnalysisTypes getAnalysis(){
 		return analysis;
-    }
-
-    public String createWitness(){
-        return witness;
     }
 }

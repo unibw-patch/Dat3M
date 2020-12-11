@@ -115,9 +115,7 @@ public class PthreadsProcedures {
 		visitor.threadCallingValues.get(visitor.currentThread).add(callingValue);
 		visitor.pool.add(threadPtr, threadName);
 		Location loc = visitor.programBuilder.getOrCreateLocation(threadPtr + "_active", -1);
-		AtomicStore child = new AtomicStore(loc.getAddress(), new IConst(1, -1), SC);
-		child.setCLine(visitor.currentLine);
-		visitor.programBuilder.addChild(visitor.threadCount, child);
+		visitor.programBuilder.addChild(visitor.threadCount, new AtomicStore(loc.getAddress(), new IConst(1, -1), SC));
 	}
 	
 	private static void pthread_join(VisitorBoogie visitor, Call_cmdContext ctx) {		

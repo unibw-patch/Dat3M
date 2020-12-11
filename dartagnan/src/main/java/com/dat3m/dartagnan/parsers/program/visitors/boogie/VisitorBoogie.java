@@ -90,7 +90,6 @@ import com.dat3m.dartagnan.program.atomic.event.AtomicLoad;
 import com.dat3m.dartagnan.program.atomic.event.AtomicStore;
 import com.dat3m.dartagnan.program.event.Assume;
 import com.dat3m.dartagnan.program.event.CondJump;
-import com.dat3m.dartagnan.program.event.Event;
 import com.dat3m.dartagnan.program.event.FunCall;
 import com.dat3m.dartagnan.program.event.FunRet;
 import com.dat3m.dartagnan.program.event.If;
@@ -305,9 +304,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
     					int precision = type.contains("bv") ? Integer.parseInt(type.split("bv")[1]) : -1;
         				Register register = programBuilder.getOrCreateRegister(threadCount, currentScope.getID() + ":" + ident.getText(), precision);
         				ExprInterface value = callingValues.get(index);
-        				Local child = new Local(register, value);
-        				child.setCLine(currentLine);
-						programBuilder.addChild(threadCount, child);
+						programBuilder.addChild(threadCount, new Local(register, value));
         				index++;    					
     				}
     			}
@@ -348,7 +345,6 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
     	assertionIndex++;
     	Local event = new Local(ass, expr);
 		event.addFilters(EType.ASSERTION);
-		event.setCLine(currentLine);
 		programBuilder.addChild(threadCount, event);
     	return null;
     }
@@ -378,7 +374,6 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 	    	assertionIndex++;
 	    	Local event = new Local(ass, new BConst(false));
 			event.addFilters(EType.ASSERTION);
-			event.setCLine(currentLine);
 			programBuilder.addChild(threadCount, event);
 			return null;
 		}
@@ -422,17 +417,13 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 		if(!procedures.containsKey(name)) {
 			throw new ParsingException("Procedure " + name + " is not defined");
 		}
-		Event call = new FunCall(name);
-		call.setCLine(currentLine);
-		programBuilder.addChild(threadCount, call);	
+		programBuilder.addChild(threadCount, new FunCall(name));	
 		visitProc_decl(procedures.get(name), false, callingValues);
 		if(ctx.equals(atomicMode)) {
 			SvcompProcedures.__VERIFIER_atomic(this, false);
 			atomicMode = null;
 		}
-		Event ret = new FunRet(name);
-		ret.setCLine(call.getCLine());
-		programBuilder.addChild(threadCount, ret);
+		programBuilder.addChild(threadCount, new FunRet(name));
 		if(name.equals("$initialize")) {
 			initMode = false;
 		}
@@ -512,31 +503,21 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 	        		} catch (Exception e) {
 	        			// Nothing to be done
 	        		}
-	        		Load child = new Load(register, (IExpr)value, null);
-	        		if(!allocationRegs.contains(value)) {
-		        		child.setCLine(currentLine);
-	        		}
-					programBuilder.addChild(threadCount, child);	        			
+					programBuilder.addChild(threadCount, new Load(register, (IExpr)value, null));	        			
 		            continue;
 	        	}
-	            Local child = new Local(register, value);
-	            child.setCLine(currentLine);
-				programBuilder.addChild(threadCount, child);	        		
+				programBuilder.addChild(threadCount, new Local(register, value));	        		
 	            continue;
 	        }
 	        Location location = programBuilder.getLocation(name);
 	        if(location != null){
-	            Store child = new Store(location.getAddress(), value, null);
-	            child.setCLine(currentLine);
-				programBuilder.addChild(threadCount, child);
+				programBuilder.addChild(threadCount, new Store(location.getAddress(), value, null));
 	            continue;
 	        }
 	        if(currentReturnName.equals(name)) {
 	        	if(!returnRegister.isEmpty()) {
 	        		Register ret = returnRegister.remove(returnRegister.size() - 1);
-					Local child = new Local(ret, value);
-					child.setCLine(currentLine);
-					programBuilder.addChild(threadCount, child);
+					programBuilder.addChild(threadCount, new Local(ret, value));
 	        	}
 	        	continue;
 	        }
@@ -744,9 +725,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 			if(initMode && value instanceof IConst && ((IConst)value).getValue() == 0) {
 				return null;
 			}
-			Store child = new Store(address, value, null);
-			child.setCLine(currentLine);
-			programBuilder.addChild(threadCount, child);	
+			programBuilder.addChild(threadCount, new Store(address, value, null));	
 			return null;
 		}
 		// push currentCall to the call stack

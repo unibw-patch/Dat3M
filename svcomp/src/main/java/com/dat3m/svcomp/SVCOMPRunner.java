@@ -63,10 +63,6 @@ public class SVCOMPRunner {
 	    	if(options.useISolver()) {
 	    		cmd.add("-incrementalSolver");
 	    	}
-	    	if(options.createWitness()) {
-	    		cmd.add("-w");
-	    		cmd.add(options.getProgramFilePath());
-	    	}
 	    	ProcessBuilder processBuilder = new ProcessBuilder(cmd); 
 
 	        try {
