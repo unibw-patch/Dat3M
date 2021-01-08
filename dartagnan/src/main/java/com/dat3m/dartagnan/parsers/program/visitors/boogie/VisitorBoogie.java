@@ -290,7 +290,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
     	currentScope = new Scope(nextScopeID, currentScope);
     	nextScopeID++;
     	
-    	Impl_bodyContext body = ctx.impl_body();;
+    	Impl_bodyContext body = ctx.impl_body();
     	if(body == null) {
 			throw new ParsingException(ctx.proc_sign().Ident().getText() + " cannot be handled");
     	}
@@ -374,7 +374,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 		}
 		String name = ctx.call_params().Define() == null ? ctx.call_params().Ident(0).getText() : ctx.call_params().Ident(1).getText();
 		if(name.equals("$initialize")) {
-			initMode = true;;
+			initMode = true;
 		}
 		if(name.equals("abort")) {
 	       	Label label = programBuilder.getOrCreateLabel("END_OF_T" + threadCount);
@@ -524,10 +524,19 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 	        		} catch (Exception e) {
 	        			// Nothing to be done
 	        		}
-					programBuilder.addChild(threadCount, new Load(register, (IExpr)value, null));	        			
+					//programBuilder.addChild(threadCount, new Load(register, (IExpr)value, null));
+					child = new Load(register, (IExpr)value, null);
+
+					child.setCline(currentLine);
+					programBuilder.addChild(threadCount, child);
+
 		            continue;
 	        	}
-				programBuilder.addChild(threadCount, new Local(register, value));	        		
+				//programBuilder.addChild(threadCount, new Local(register, value));
+				child = new Local(register, value);
+
+				child.setCline(currentLine);
+				programBuilder.addChild(threadCount, child);
 	            continue;
 	        }
 	        Location location = programBuilder.getLocation(name);
@@ -571,6 +580,7 @@ public class VisitorBoogie extends BoogieBaseVisitor<Object> implements BoogieVi
 		// We can get rid of all the "assume true" statements
 		if(ctx.getText().contains("sourceloc")) {
 			cLine = selectCline(ctx.getText());
+			System.out.println(cLine);
 		}
 		if(!ctx.proposition().expr().getText().equals("true")) {
 			Label pairingLabel = null;

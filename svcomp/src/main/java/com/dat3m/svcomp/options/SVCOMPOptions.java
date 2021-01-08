@@ -21,7 +21,8 @@ public class SVCOMPOptions extends BaseOptions {
     protected String optimization = "O0";
     protected boolean bp;
     protected boolean iSolver;
-    private AnalysisTypes analysis; 
+    private AnalysisTypes analysis;
+    protected boolean witness = false;
     
     public SVCOMPOptions(){
         super();
@@ -37,6 +38,9 @@ public class SVCOMPOptions extends BaseOptions {
 
         addOption(new Option("incrementalSolver", false,
         		"Use an incremental solver"));
+
+        addOption(new Option("w", "witness", false,
+                "Creates a violation witness with class Dartagnan"));
 
         addOption(new Option("o", "optimization", true,
                 "Optimization flag for LLVM compiler"));
@@ -57,6 +61,7 @@ public class SVCOMPOptions extends BaseOptions {
         }
         iSolver = cmd.hasOption("incrementalSolver");
         bp = cmd.hasOption("bit-precise");
+        witness = cmd.hasOption("witness");
         
         String property = Files.getNameWithoutExtension(cmd.getOptionValue("property"));
         switch(property) {
@@ -84,6 +89,9 @@ public class SVCOMPOptions extends BaseOptions {
 
     public boolean useBP(){
         return bp;
+    }
+    public boolean useWitness(){
+        return witness;
     }
 
     public AnalysisTypes getAnalysis(){

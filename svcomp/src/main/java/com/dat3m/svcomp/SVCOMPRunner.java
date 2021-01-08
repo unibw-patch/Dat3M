@@ -63,6 +63,10 @@ public class SVCOMPRunner {
 	    	if(options.useISolver()) {
 	    		cmd.add("-incrementalSolver");
 	    	}
+	    	if(options.useWitness()) {
+				cmd.add("-w");
+				cmd.add(options.getProgramFilePath());
+			}
 	    	ProcessBuilder processBuilder = new ProcessBuilder(cmd); 
 
 	        try {
@@ -76,6 +80,7 @@ public class SVCOMPRunner {
 				}
 				while(read.ready()) {
 					output = read.readLine();
+					System.out.println(output);
 				}
 				if(proc.exitValue() == 1) {
 					BufferedReader error = new BufferedReader(new InputStreamReader(proc.getErrorStream()));

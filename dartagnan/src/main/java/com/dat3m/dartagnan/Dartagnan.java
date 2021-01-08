@@ -8,6 +8,7 @@ import static com.microsoft.z3.enumerations.Z3_ast_print_mode.Z3_PRINT_SMTLIB_FU
 
 import java.io.*;
 import com.dat3m.dartagnan.program.Witness;
+import com.dat3m.dartagnan.utils.printer.Printer;
 import com.microsoft.z3.*;
 import org.apache.commons.cli.HelpFormatter;
 
@@ -43,6 +44,9 @@ public class Dartagnan {
 
         Wmm mcm = new ParserCat().parse(new File(options.getTargetModelFilePath()));
         Program p = new ProgramParser().parse(new File(options.getProgramFilePath()));
+
+        Printer po = new Printer();
+        System.out.print(po.print(p));
 		
         Arch target = p.getArch();
         if(target == null){
@@ -65,6 +69,7 @@ public class Dartagnan {
         if(result.equals(FAIL)) {
             //int position = -1;
             Model m = s.getModel();
+
 
             //Here to call the witness class and transport the model to witness and modify all the things there
             //here just using the event which are memory events and which are executed!

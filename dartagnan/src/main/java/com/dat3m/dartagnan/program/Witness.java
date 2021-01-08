@@ -44,14 +44,10 @@ public class Witness {
 
         for(Event e : program.getEvents()){
 
-            //System.out.println(e.toString() + " " + e.getCline());
+            System.out.println(e.toString() + " " + e.getCline());
 
             if (this.if_create_thread(e)) {
-                /*position = Integer.parseInt(model.getConstInterp(Utils.intVar("hb", e, context)).toString());
-                executed_event_position.put(e, position);
-                System.out.println("haha");*/
                 count_threads++;
-                //continue;
             }
 
             if(this.model.getConstInterp(e.exec()).isTrue() && e.getCline() > -1) {
