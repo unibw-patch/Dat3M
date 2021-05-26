@@ -3,7 +3,7 @@ CFLAGS=-m32 -masm=intel -fomit-frame-pointer  -fno-stack-protector -static -no-p
 
 # Compilation
 
-all: spectre-sct spectre-sct
+all: spectre-sct spectre-sct.s
 
 .DEFAULT_GOAL := all
 
